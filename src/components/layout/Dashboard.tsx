@@ -1,50 +1,30 @@
-// 
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 
 import Header from "./Header";
-import SearchBar from "../search/SearchBar";
 
-import CurrentWeather from "../weather/CurrentWeather";
-import HourlyForecast from "../weather/HourlyForecast";
-import WeeklyForecast from "../weather/WeeklyForecast";
+import DashboardSearch from "../dashboard/DashboardSearch";
+import DashboardCurrent from "../dashboard/DashboardCurrent";
+import DashboardCards from "../dashboard/DashboardCards";
+import DashboardForecast from "../dashboard/DashboardForecast";
+import DashboardCharts from "../dashboard/DashboardCharts";
+import DashboardDetails from "../dashboard/DashboardDetails";
+import DashboardHighlights from "../dashboard/DashboardHighlights";
+import DashboardMap from "../dashboard/DashboardMap";
 
-import TemperatureChart from "../charts/TemperatureChart";
-import WeatherStats from "../charts/WeatherStats";
-
-import AQICard from "../cards/AQICard";
-import WindCard from "../cards/WindCard";
-import SunriseCard from "../cards/SunriseCard";
-import UVCard from "../cards/UVCard";
-
-import WeatherAlerts from "../alerts/WeatherAlerts";
-import FavoriteCities from "../search/FavoriteCities";
+import WeatherEffects from "../effects/WeatherEffects";
 
 import { useWeather } from "@/hooks/useWeather";
-import { getWeatherTheme } from "@/utils/weatherTheme";
-import WeatherEffects from "../effects/WeatherEffects";
-import WeatherDetails from "../weather/WeatherDetails";
 import { useWeatherStore } from "@/store/weatherStore";
-
-const WeatherMap = dynamic(
-  () => import("../map/WeatherMap"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-[420px] items-center justify-center rounded-3xl border border-slate-700 bg-[#111827] text-slate-400">
-        Loading Map...
-      </div>
-    ),
-  }
-);
+import { getWeatherTheme } from "@/utils/weatherTheme";
 
 export default function Dashboard() {
   const [city, setCity] = useState("Agartala");
+
   const setGlobalCity = useWeatherStore(
-  (state) => state.setCity
-);
+    (state) => state.setCity
+  );
 
   const [coords, setCoords] = useState<{
     lat: number;
@@ -52,11 +32,23 @@ export default function Dashboard() {
   } | null>(null);
 
   const [favorites, setFavorites] = useState<string[]>([]);
-    useEffect(() => {
-    const saved = localStorage.getItem("favoriteCities");
 
-    if (saved) {
-      setFavorites(JSON.parse(saved));
+  const [recentSearches, setRecentSearches] =
+    useState<string[]>([]);
+
+  useEffect(() => {
+    const savedFavorites =
+      localStorage.getItem("favoriteCities");
+
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+
+    const savedRecent =
+      localStorage.getItem("recentSearches");
+
+    if (savedRecent) {
+      setRecentSearches(JSON.parse(savedRecent));
     }
   }, []);
 
@@ -71,6 +63,24 @@ export default function Dashboard() {
 
     localStorage.setItem(
       "favoriteCities",
+      JSON.stringify(updated)
+    );
+  };
+
+  const addRecentSearch = (
+    searchedCity: string
+  ) => {
+    const updated = [
+      searchedCity,
+      ...recentSearches.filter(
+        (item) => item !== searchedCity
+      ),
+    ].slice(0, 10);
+
+    setRecentSearches(updated);
+
+    localStorage.setItem(
+      "recentSearches",
       JSON.stringify(updated)
     );
   };
@@ -92,7 +102,6 @@ export default function Dashboard() {
       },
       (error) => {
         console.error(error);
-
         alert("Unable to access your location.");
       },
       {
@@ -103,15 +112,12 @@ export default function Dashboard() {
     );
   };
 
-  const { data, loading, error } = useWeather(
-    city,
-    coords
-  );
-
-  if (loading) {
+  const { data, loading, error } =
+    useWeather(city, coords);
+      if (loading) {
     return (
       <section className="flex flex-1 items-center justify-center">
-        <div className="text-xl text-white">
+        <div className="text-xl font-semibold text-white">
           Loading weather...
         </div>
       </section>
@@ -133,97 +139,162 @@ export default function Dashboard() {
   const theme = getWeatherTheme(
     data.current.condition.text
   );
-    return (
-<section
-  className={`relative flex-1 overflow-y-auto bg-gradient-to-br ${theme} p-8 transition-all duration-700`}
->
-  <WeatherEffects
-  condition={data.current.condition.text}
-/>
+
+  return (
+    <section
+      className={`relative flex-1 overflow-y-auto bg-gradient-to-br ${theme} p-8 transition-all duration-700`}
+    >
+      {/* Weather Effects */}
+
+      <WeatherEffects
+        condition={data.current.condition.text}
+      />
+
       {/* Header */}
+
       <Header />
 
       {/* Search */}
-      <div className="mb-6">
-        <SearchBar
-          onSearch={(selectedCity) => {
-            setCoords(null);
-            setCity(selectedCity);
-setGlobalCity(selectedCity);
-          }}
-          onCurrentLocation={handleCurrentLocation}
-        />
 
-        <div className="mt-4">
-          <button
-            onClick={addFavorite}
-            className="rounded-xl bg-yellow-500 px-5 py-2 font-semibold text-black transition hover:bg-yellow-400"
-          >
-            ⭐ Add to Favorites
-          </button>
-        </div>
-      </div>
+      <DashboardSearch
+        favorites={favorites}
+        recentSearches={recentSearches}
+        onSearch={(selectedCity) => {
+          setCoords(null);
+          setCity(selectedCity);
+          setGlobalCity(selectedCity);
+          addRecentSearch(selectedCity);
+        }}
+        onCurrentLocation={handleCurrentLocation}
+        onFavoriteSelect={(selectedCity) => {
+          setCoords(null);
+          setCity(selectedCity);
+          setGlobalCity(selectedCity);
+          addRecentSearch(selectedCity);
+        }}
+        onRecentSelect={(selectedCity) => {
+          setCoords(null);
+          setCity(selectedCity);
+          setGlobalCity(selectedCity);
+          addRecentSearch(selectedCity);
+        }}
+        onAddFavorite={addFavorite}
+      />
 
-      {/* Favorite Cities */}
-      <div className="mb-6">
-        <FavoriteCities
-          favorites={favorites}
-          onSelect={(selectedCity) => {
-            setCoords(null);
-            setCity(selectedCity);
-setGlobalCity(selectedCity);
-          }}
-        />
-      </div>
+      {/* Current Weather */}
 
-      {/* Current Weather + Hourly Forecast */}
-      <div className="grid gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2">
-          <CurrentWeather weather={data} />
-        </div>
-
-        <HourlyForecast weather={data} />
-      </div>
+      <DashboardCurrent
+        weather={data}
+      />
 
       {/* Weather Cards */}
-      <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <AQICard weather={data} />
-        <WindCard weather={data} />
-        <SunriseCard weather={data} />
-        <UVCard weather={data} />
-      </div>
+
+      <DashboardCards
+        weather={data}
+      />
 
       {/* Weekly Forecast */}
-      <div className="mt-6">
-        <WeeklyForecast weather={data} />
-      </div>
 
-      {/* Temperature Chart */}
-      <div className="mt-6">
-        <TemperatureChart weather={data} />
-      </div>
+      <DashboardForecast
+        weather={data}
+      />
 
-      {/* Weather Statistics */}
-      <div className="mt-6">
-        <WeatherStats weather={data} />
-      </div>
+      {/* Charts */}
 
-      <div className="mt-6">
-  <WeatherDetails weather={data} />
-</div>
+      <DashboardCharts
+        weather={data}
+      />
 
-      {/* Map + Alerts */}
-      <div className="mt-6 grid gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2">
-          <WeatherMap
-            lat={data.location.lat}
-            lon={data.location.lon}
-            city={data.location.name}
-          />
+      {/* Weather Details */}
+
+      <DashboardDetails
+        weather={data}
+      />
+
+      {/* Highlights */}
+
+      <DashboardHighlights
+        weather={data}
+      />
+
+      {/* Map */}
+
+      <DashboardMap
+        weather={data}
+      />
+            {/* Footer */}
+
+      <footer className="mt-10 overflow-hidden rounded-3xl border border-slate-700 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 shadow-2xl">
+
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+
+          {/* Left */}
+
+          <div>
+
+            <h2 className="text-3xl font-bold text-white">
+              🌤 Weather Dashboard
+            </h2>
+
+            <p className="mt-4 max-w-2xl leading-7 text-slate-400">
+
+              A modern weather dashboard built using
+              Next.js, React, TypeScript,
+              Tailwind CSS, Zustand,
+              WeatherAPI, Leaflet and Recharts.
+
+            </p>
+
+          </div>
+
+          {/* Right */}
+
+          <div className="grid grid-cols-2 gap-8 text-center">
+
+            <div>
+
+              <p className="text-sm text-slate-500">
+                Version
+              </p>
+
+              <h3 className="mt-2 text-2xl font-bold text-white">
+                2.0.0
+              </h3>
+
+            </div>
+
+            <div>
+
+              <p className="text-sm text-slate-500">
+                Theme
+              </p>
+
+              <h3 className="mt-2 text-2xl font-bold text-white">
+                Dynamic
+              </h3>
+
+            </div>
+
+          </div>
+
         </div>
 
-        <WeatherAlerts weather={data} />
-      </div>
-    </section>
+        <div className="my-8 h-px bg-slate-700" />
+
+        <div className="flex flex-col items-center justify-between gap-4 text-sm text-slate-500 md:flex-row">
+
+          <p>
+            © {new Date().getFullYear()} Weather Dashboard
+          </p>
+
+          <p>
+            Designed & Developed using
+            Next.js • React • Tailwind CSS
+          </p>
+
+        </div>
+
+      </footer>
+          </section>
   );
 }

@@ -31,9 +31,21 @@ export default function SearchBar({
     setCity("");
   };
 
+  const selectCity = (selectedCity: string) => {
+    onSearch(selectedCity);
+
+    setCity("");
+
+    // Input loses focus and dropdown disappears
+    (document.activeElement as HTMLElement)?.blur();
+  };
+
   return (
     <div className="flex flex-col gap-3 md:flex-row">
+
+      {/* Search */}
       <div className="relative flex-1">
+
         <input
           type="text"
           value={city}
@@ -47,6 +59,7 @@ export default function SearchBar({
           className="w-full rounded-xl border border-slate-700 bg-slate-800 py-3 pl-5 pr-24 text-white placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
         />
 
+        {/* Clear */}
         {city && (
           <button
             type="button"
@@ -57,6 +70,7 @@ export default function SearchBar({
           </button>
         )}
 
+        {/* Search Button */}
         <button
           type="button"
           onClick={handleSearch}
@@ -66,22 +80,22 @@ export default function SearchBar({
           <Search size={18} />
         </button>
 
+        {/* Loading */}
         {loading && (
-          <div className="absolute left-4 top-full mt-2 text-sm text-slate-400">
-            Searching...
+          <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-xl border border-slate-700 bg-slate-900 p-4 text-center text-slate-400">
+            🔍 Searching cities...
           </div>
         )}
 
-        {cities.length > 0 && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 shadow-xl">
+        {/* Suggestions */}
+        {!loading && cities.length > 0 && (
+          <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+
             {cities.map((item: City) => (
               <button
                 key={`${item.name}-${item.lat}-${item.lon}`}
                 type="button"
-                onClick={() => {
-                  setCity(item.name);
-                  onSearch(item.name);
-                }}
+                onClick={() => selectCity(item.name)}
                 className="flex w-full flex-col border-b border-slate-800 px-4 py-3 text-left transition hover:bg-slate-800 last:border-none"
               >
                 <span className="font-medium text-white">
@@ -93,10 +107,13 @@ export default function SearchBar({
                 </span>
               </button>
             ))}
+
           </div>
         )}
+
       </div>
 
+      {/* Current Location */}
       <button
         type="button"
         onClick={onCurrentLocation}
@@ -105,6 +122,7 @@ export default function SearchBar({
         <LocateFixed size={18} />
         My Location
       </button>
+
     </div>
   );
 }

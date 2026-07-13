@@ -9,10 +9,10 @@ export function useCitySearch(query: string) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!query.trim()) {
-      setCities([]);
-      return;
-    }
+if (query.trim().length < 2) {
+    setCities([]);
+    return;
+}
 
     const timer = setTimeout(async () => {
       try {
