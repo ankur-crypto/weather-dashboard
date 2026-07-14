@@ -17,6 +17,8 @@ interface Props {
   onRecentSelect: (city: string) => void;
 
   onAddFavorite: () => void;
+
+  onRemoveFavorite: (city: string) => void;
 }
 
 export default function DashboardSearch({
@@ -27,6 +29,7 @@ export default function DashboardSearch({
   onFavoriteSelect,
   onRecentSelect,
   onAddFavorite,
+  onRemoveFavorite,
 }: Props) {
   return (
     <>
@@ -61,13 +64,14 @@ export default function DashboardSearch({
 
       </div>
 
-      {/* Favourite */}
+      {/* Favorite Cities */}
 
       <div className="mb-6">
 
         <FavoriteCities
           favorites={favorites}
           onSelect={onFavoriteSelect}
+          onRemove={onRemoveFavorite}
         />
 
       </div>

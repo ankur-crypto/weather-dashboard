@@ -5,6 +5,10 @@ import { useEffect, useState } from "react";
 import Header from "./Header";
 
 import DashboardSearch from "../dashboard/DashboardSearch";
+import DashboardOverview from "../dashboard/DashboardOverview";
+import AddComparisonCity from "../dashboard/AddComparisonCity";
+import DashboardSkeleton from "../dashboard/DashboardSkeleton";
+import CityComparison from "../dashboard/CityComparison";
 import DashboardCurrent from "../dashboard/DashboardCurrent";
 import DashboardCards from "../dashboard/DashboardCards";
 import DashboardForecast from "../dashboard/DashboardForecast";
@@ -16,6 +20,7 @@ import DashboardMap from "../dashboard/DashboardMap";
 import WeatherEffects from "../effects/WeatherEffects";
 
 import { useWeather } from "@/hooks/useWeather";
+import { useComparisonCities } from "@/hooks/useComparisonCities";
 import { useWeatherStore } from "@/store/weatherStore";
 import { getWeatherTheme } from "@/utils/weatherTheme";
 
@@ -35,6 +40,12 @@ export default function Dashboard() {
 
   const [recentSearches, setRecentSearches] =
     useState<string[]>([]);
+
+  const {
+    cities: comparisonCities,
+    addCity,
+    removeCity,
+  } = useComparisonCities();
 
   useEffect(() => {
     const savedFavorites =
@@ -58,6 +69,19 @@ export default function Dashboard() {
     if (favorites.includes(city)) return;
 
     const updated = [...favorites, city];
+
+    setFavorites(updated);
+
+    localStorage.setItem(
+      "favoriteCities",
+      JSON.stringify(updated)
+    );
+  };
+
+  const removeFavorite = (city: string) => {
+    const updated = favorites.filter(
+      (item) => item !== city
+    );
 
     setFavorites(updated);
 
@@ -102,6 +126,7 @@ export default function Dashboard() {
       },
       (error) => {
         console.error(error);
+
         alert("Unable to access your location.");
       },
       {
@@ -114,15 +139,13 @@ export default function Dashboard() {
 
   const { data, loading, error } =
     useWeather(city, coords);
-      if (loading) {
-    return (
-      <section className="flex flex-1 items-center justify-center">
-        <div className="text-xl font-semibold text-white">
-          Loading weather...
-        </div>
-      </section>
-    );
-  }
+if (loading) {
+  return (
+    <section className="flex-1 p-8">
+      <DashboardSkeleton />
+    </section>
+  );
+}
 
   if (error) {
     return (
@@ -154,7 +177,7 @@ export default function Dashboard() {
 
       <Header />
 
-      {/* Search */}
+      {/* Dashboard Search */}
 
       <DashboardSearch
         favorites={favorites}
@@ -179,6 +202,33 @@ export default function Dashboard() {
           addRecentSearch(selectedCity);
         }}
         onAddFavorite={addFavorite}
+        onRemoveFavorite={removeFavorite}
+      />
+
+      {/* Dashboard Overview */}
+
+      <DashboardOverview
+        weather={data}
+        favoriteCount={favorites.length}
+      />
+
+      {/* Add Comparison City */}
+
+      <AddComparisonCity
+        onAdd={addCity}
+      />
+
+      {/* Live City Comparison */}
+
+      <CityComparison
+        cities={comparisonCities}
+        onSelect={(selectedCity) => {
+          setCoords(null);
+          setCity(selectedCity);
+          setGlobalCity(selectedCity);
+          addRecentSearch(selectedCity);
+        }}
+        onRemove={removeCity}
       />
 
       {/* Current Weather */}
@@ -198,8 +248,7 @@ export default function Dashboard() {
       <DashboardForecast
         weather={data}
       />
-
-      {/* Charts */}
+            {/* Weather Charts */}
 
       <DashboardCharts
         weather={data}
@@ -211,18 +260,19 @@ export default function Dashboard() {
         weather={data}
       />
 
-      {/* Highlights */}
+      {/* Today's Highlights */}
 
       <DashboardHighlights
         weather={data}
       />
 
-      {/* Map */}
+      {/* Weather Map */}
 
       <DashboardMap
         weather={data}
       />
-            {/* Footer */}
+
+      {/* Footer */}
 
       <footer className="mt-10 overflow-hidden rounded-3xl border border-slate-700 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 shadow-2xl">
 
@@ -238,7 +288,7 @@ export default function Dashboard() {
 
             <p className="mt-4 max-w-2xl leading-7 text-slate-400">
 
-              A modern weather dashboard built using
+              A professional weather dashboard built using
               Next.js, React, TypeScript,
               Tailwind CSS, Zustand,
               WeatherAPI, Leaflet and Recharts.
@@ -258,7 +308,7 @@ export default function Dashboard() {
               </p>
 
               <h3 className="mt-2 text-2xl font-bold text-white">
-                2.0.0
+                2.2.0
               </h3>
 
             </div>
@@ -288,8 +338,7 @@ export default function Dashboard() {
           </p>
 
           <p>
-            Designed & Developed using
-            Next.js • React • Tailwind CSS
+            Built with ❤️ using Next.js, React, Tailwind CSS & WeatherAPI
           </p>
 
         </div>

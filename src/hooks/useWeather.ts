@@ -11,6 +11,8 @@ interface Coordinates {
   lon: number;
 }
 
+const REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
+
 export function useWeather(
   city: string,
   coords?: Coordinates | null
@@ -42,14 +44,24 @@ export function useWeather(
         setWeather(result);
       } catch (err) {
         console.error(err);
-
         setError("Unable to fetch weather.");
       } finally {
         setLoading(false);
       }
     }
 
+    // Initial fetch
     fetchWeather();
+
+    // Auto refresh every 10 minutes
+    const interval = setInterval(() => {
+      fetchWeather();
+    }, REFRESH_INTERVAL);
+
+    // Cleanup
+    return () => {
+      clearInterval(interval);
+    };
   }, [city, coords, setWeather]);
 
   return {

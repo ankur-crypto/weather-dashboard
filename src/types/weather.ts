@@ -30,6 +30,13 @@ export interface Current {
 export interface Day {
   maxtemp_c: number;
   mintemp_c: number;
+  avgtemp_c: number;
+
+  maxwind_kph: number;
+  avghumidity: number;
+
+  daily_chance_of_rain: number;
+  daily_chance_of_snow: number;
 
   condition: Condition;
 }
