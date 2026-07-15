@@ -10,25 +10,28 @@ import {
   CartesianGrid,
 } from "recharts";
 
+import { WeatherData } from "@/types/weather";
+
 interface Props {
-  weather: any;
+  weather: WeatherData;
 }
 
-export default function TemperatureChart({ weather }: Props) {
+export default function TemperatureChart({
+  weather,
+}: Props) {
   if (!weather) return null;
 
-  const chartData = weather.forecast.forecastday[0].hour.map(
-    (hour: any) => ({
+  const chartData =
+    weather.forecast.forecastday[0].hour.map((hour) => ({
       time: new Date(hour.time).toLocaleTimeString([], {
         hour: "numeric",
       }),
       temp: hour.temp_c,
       rain: hour.chance_of_rain,
-    })
-  );
+    }));
 
   return (
-    <div className="rounded-3xl border border-slate-700 bg-[#111827]/90 backdrop-blur-md p-6 shadow-xl">
+    <div className="rounded-3xl border border-slate-700 bg-[#111827]/90 p-6 shadow-xl backdrop-blur-md">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-white">
           24 Hour Temperature
@@ -40,7 +43,10 @@ export default function TemperatureChart({ weather }: Props) {
       </div>
 
       <div className="h-[350px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+        >
           <LineChart
             data={chartData}
             margin={{
@@ -58,9 +64,18 @@ export default function TemperatureChart({ weather }: Props) {
                 x2="1"
                 y2="0"
               >
-                <stop offset="0%" stopColor="#38BDF8" />
-                <stop offset="50%" stopColor="#3B82F6" />
-                <stop offset="100%" stopColor="#6366F1" />
+                <stop
+                  offset="0%"
+                  stopColor="#38BDF8"
+                />
+                <stop
+                  offset="50%"
+                  stopColor="#3B82F6"
+                />
+                <stop
+                  offset="100%"
+                  stopColor="#6366F1"
+                />
               </linearGradient>
             </defs>
 
@@ -72,12 +87,18 @@ export default function TemperatureChart({ weather }: Props) {
             <XAxis
               dataKey="time"
               stroke="#94A3B8"
-              tick={{ fill: "#CBD5E1", fontSize: 12 }}
+              tick={{
+                fill: "#CBD5E1",
+                fontSize: 12,
+              }}
             />
 
             <YAxis
               stroke="#94A3B8"
-              tick={{ fill: "#CBD5E1", fontSize: 12 }}
+              tick={{
+                fill: "#CBD5E1",
+                fontSize: 12,
+              }}
               unit="°"
             />
 
@@ -88,7 +109,10 @@ export default function TemperatureChart({ weather }: Props) {
                 borderRadius: "12px",
                 color: "#fff",
               }}
-              formatter={(value: number) => [`${value}°C`, "Temperature"]}
+              formatter={(value) => [
+                `${Number(value ?? 0)}°C`,
+                "Temperature",
+              ]}
             />
 
             <Line

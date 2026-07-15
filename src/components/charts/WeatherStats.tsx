@@ -88,7 +88,10 @@ export default function TemperatureChart({ weather }: Props) {
                 borderRadius: "12px",
                 color: "#fff",
               }}
-              formatter={(value: number) => [`${value}°C`, "Temperature"]}
+              formatter={(value) => [
+  `${Number(value ?? 0)}°C`,
+  "Temperature",
+]}
             />
 
             <Line
