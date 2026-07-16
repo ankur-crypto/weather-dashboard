@@ -4,6 +4,10 @@ import DashboardCharts from "./DashboardCharts";
 import DashboardDetails from "./DashboardDetails";
 import DashboardHighlights from "./DashboardHighlights";
 import DashboardMap from "./DashboardMap";
+import WeatherAssistant from "./WeatherAssistant";
+import WeatherNotifications from "./WeatherNotifications";
+
+import WeatherNews from "../news/WeatherNews";
 
 import { WeatherData } from "@/types/weather";
 
@@ -16,28 +20,46 @@ export default function DashboardBottom({
 }: Props) {
   return (
     <>
-      {/* Charts */}
+      {/* Weather Charts */}
 
       <DashboardCharts
         weather={weather}
       />
 
-      {/* Details */}
+      {/* Weather Details */}
 
       <DashboardDetails
         weather={weather}
       />
 
-      {/* Highlights */}
+      {/* Today's Highlights */}
 
       <DashboardHighlights
         weather={weather}
       />
 
-      {/* Map */}
+      {/* Weather Map */}
 
       <DashboardMap
         weather={weather}
+      />
+
+      {/* AI Assistant & Notifications */}
+
+      <div className="mt-8 grid gap-6 xl:grid-cols-2">
+        <WeatherAssistant
+          weather={weather}
+        />
+
+        <WeatherNotifications
+          weather={weather}
+        />
+      </div>
+
+      {/* Weather News */}
+
+      <WeatherNews
+        city={weather.location.name}
       />
     </>
   );

@@ -16,14 +16,30 @@ export interface Current {
   temp_c: number;
   feelslike_c: number;
   humidity: number;
+
   wind_kph: number;
   wind_dir: string;
+
   pressure_mb: number;
+
   vis_km: number;
+
   uv: number;
+
   precip_mm: number;
 
+  // Add these ↓
+
+  gust_kph?: number;
+
+  cloud?: number;
+
+  is_day?: number;
+
+  last_updated?: string;
+
   condition: Condition;
+
   air_quality: AirQuality;
 }
 

@@ -4,6 +4,7 @@ import DashboardCurrent from "./DashboardCurrent";
 import WeatherTimeline from "./WeatherTimeline";
 import DashboardCards from "./DashboardCards";
 import DashboardForecast from "./DashboardForecast";
+import WeatherAnalytics from "./WeatherAnalytics";
 
 import { WeatherData } from "@/types/weather";
 
@@ -22,13 +23,13 @@ export default function DashboardCenter({
         weather={weather}
       />
 
-      {/* Timeline */}
+      {/* Hourly Timeline */}
 
       <WeatherTimeline
         weather={weather}
       />
 
-      {/* Cards */}
+      {/* Weather Statistics */}
 
       <DashboardCards
         weather={weather}
@@ -37,6 +38,12 @@ export default function DashboardCenter({
       {/* Weekly Forecast */}
 
       <DashboardForecast
+        weather={weather}
+      />
+
+      {/* Weather Analytics */}
+
+      <WeatherAnalytics
         weather={weather}
       />
     </>

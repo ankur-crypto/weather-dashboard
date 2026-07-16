@@ -3,6 +3,7 @@
 import SearchBar from "../search/SearchBar";
 import FavoriteCities from "../search/FavoriteCities";
 import RecentSearches from "../search/RecentSearches";
+import VoiceSearch from "../search/VoiceSearch";
 
 interface Props {
   favorites: string[];
@@ -37,10 +38,18 @@ export default function DashboardSearch({
 
       <div className="mb-6">
 
-        <SearchBar
-          onSearch={onSearch}
-          onCurrentLocation={onCurrentLocation}
-        />
+<div className="flex flex-col gap-4 md:flex-row md:items-center">
+  <div className="flex-1">
+    <SearchBar
+      onSearch={onSearch}
+      onCurrentLocation={onCurrentLocation}
+    />
+  </div>
+
+  <VoiceSearch
+    onResult={onSearch}
+  />
+</div>
 
         <div className="mt-5">
 
