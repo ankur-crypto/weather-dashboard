@@ -35,6 +35,7 @@ export default function Dashboard() {
     addRecentSearch,
 
     handleCurrentLocation,
+    locationLoading,
 
     comparisonCities,
     addCity,
@@ -49,7 +50,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <section className="flex-1 p-8">
+      <section className="flex-1 p-4 sm:p-6 lg:p-8">
         <DashboardSkeleton />
       </section>
     );
@@ -57,9 +58,31 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <section className="flex flex-1 items-center justify-center">
-        <div className="rounded-xl bg-red-500/20 p-6 text-red-400">
-          {error}
+      <section className="flex flex-1 items-center justify-center p-6">
+        <div
+          className="
+            max-w-lg
+            rounded-3xl
+            border
+            border-red-300
+            bg-white/90
+            p-8
+            text-center
+            shadow-xl
+            backdrop-blur-xl
+            dark:border-red-500/40
+            dark:bg-[#111827]/90
+          "
+        >
+          <div className="mb-4 text-5xl">⚠️</div>
+
+          <h2 className="mb-2 text-2xl font-bold text-red-600 dark:text-red-400">
+            Unable to load weather
+          </h2>
+
+          <p className="text-slate-600 dark:text-slate-400">
+            {error}
+          </p>
         </div>
       </section>
     );
@@ -82,45 +105,48 @@ export default function Dashboard() {
 
   return (
     <section
-      className={`relative flex-1 overflow-y-auto bg-gradient-to-br ${theme} p-8 transition-all duration-700`}
+      className={`
+        relative
+        flex-1
+        overflow-y-auto
+        bg-gradient-to-br
+        ${theme}
+        p-4
+        transition-all
+        duration-700
+        sm:p-6
+        lg:p-8
+      `}
     >
-      {/* Weather Effects */}
-
       <WeatherEffects
         condition={data.current.condition.text}
       />
 
-      {/* Header */}
+      <div className="relative z-10">
+        <Header />
 
-      <Header />
+ <DashboardSearch
+  favorites={favorites}
+  recentSearches={recentSearches}
+  onSearch={handleCitySelect}
+  onFavoriteSelect={handleCitySelect}
+  onRecentSelect={handleCitySelect}
+  onCurrentLocation={handleCurrentLocation}
+  locationLoading={locationLoading}
+  onRemoveFavorite={removeFavorite}
+/>
 
-      {/* Search */}
+        <DashboardMain
+          weather={data}
+          favoriteCount={favorites.length}
+          comparisonCities={comparisonCities}
+          addCity={addCity}
+          removeCity={removeCity}
+          onCitySelect={handleCitySelect}
+        />
 
-      <DashboardSearch
-        favorites={favorites}
-        recentSearches={recentSearches}
-        onSearch={handleCitySelect}
-        onFavoriteSelect={handleCitySelect}
-        onRecentSelect={handleCitySelect}
-        onCurrentLocation={handleCurrentLocation}
-        onAddFavorite={addFavorite}
-        onRemoveFavorite={removeFavorite}
-      />
-
-      {/* Dashboard */}
-
-      <DashboardMain
-        weather={data}
-        favoriteCount={favorites.length}
-        comparisonCities={comparisonCities}
-        addCity={addCity}
-        removeCity={removeCity}
-        onCitySelect={handleCitySelect}
-      />
-
-      {/* Footer */}
-
-      <DashboardFooter />
+        <DashboardFooter />
+      </div>
     </section>
   );
 }

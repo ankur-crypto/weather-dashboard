@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
+
+import CloudEffect from "./CloudEffect";
 import RainEffect from "./RainEffect";
 import SnowEffect from "./SnowEffect";
-import CloudEffect from "./CloudEffect";
 import SunEffect from "./SunEffect";
 import ThunderEffect from "./ThunderEffect";
 
@@ -13,33 +15,53 @@ interface Props {
 export default function WeatherEffects({
   condition,
 }: Props) {
-  const text = condition.toLowerCase();
+  const effect = useMemo(() => {
+    const text = condition.trim().toLowerCase();
 
-  if (text.includes("thunder")) {
-    return <ThunderEffect />;
-  }
+    if (
+      text.includes("thunder") ||
+      text.includes("storm")
+    ) {
+      return <ThunderEffect />;
+    }
 
-  if (
-    text.includes("rain") ||
-    text.includes("drizzle")
-  ) {
-    return <RainEffect />;
-  }
+    if (
+      text.includes("rain") ||
+      text.includes("drizzle") ||
+      text.includes("shower")
+    ) {
+      return <RainEffect />;
+    }
 
-  if (text.includes("snow")) {
-    return <SnowEffect />;
-  }
+    if (
+      text.includes("snow") ||
+      text.includes("blizzard") ||
+      text.includes("sleet") ||
+      text.includes("ice")
+    ) {
+      return <SnowEffect />;
+    }
 
-  if (text.includes("cloud")) {
-    return <CloudEffect />;
-  }
+    if (
+      text.includes("cloud") ||
+      text.includes("overcast") ||
+      text.includes("mist") ||
+      text.includes("fog") ||
+      text.includes("haze")
+    ) {
+      return <CloudEffect />;
+    }
 
-  if (
-    text.includes("sun") ||
-    text.includes("clear")
-  ) {
-    return <SunEffect />;
-  }
+    if (
+      text.includes("clear") ||
+      text.includes("sun") ||
+      text.includes("sunny")
+    ) {
+      return <SunEffect />;
+    }
 
-  return null;
+    return null;
+  }, [condition]);
+
+  return effect;
 }

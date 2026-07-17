@@ -31,13 +31,30 @@ export default function TemperatureChart({
     }));
 
   return (
-    <div className="rounded-3xl border border-slate-700 bg-[#111827]/90 p-6 shadow-xl backdrop-blur-md">
+    <div
+      className="
+        rounded-3xl
+        border
+        border-slate-200
+        bg-white/90
+        p-6
+        shadow-lg
+        backdrop-blur-xl
+        transition-all
+        duration-300
+        dark:border-slate-700
+        dark:bg-[#111827]/90
+        dark:shadow-xl
+      "
+    >
+      {/* Header */}
+
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
           24 Hour Temperature
         </h2>
 
-        <span className="rounded-lg bg-blue-600 px-3 py-1 text-sm text-white">
+        <span className="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white">
           Today
         </span>
       </div>
@@ -81,33 +98,36 @@ export default function TemperatureChart({
 
             <CartesianGrid
               strokeDasharray="4 4"
-              stroke="#334155"
+              stroke="currentColor"
+              className="text-slate-300 dark:text-slate-700"
             />
 
             <XAxis
               dataKey="time"
-              stroke="#94A3B8"
+              stroke="currentColor"
+              className="text-slate-500 dark:text-slate-400"
               tick={{
-                fill: "#CBD5E1",
+                fill: "currentColor",
                 fontSize: 12,
               }}
             />
 
             <YAxis
-              stroke="#94A3B8"
+              unit="°"
+              stroke="currentColor"
+              className="text-slate-500 dark:text-slate-400"
               tick={{
-                fill: "#CBD5E1",
+                fill: "currentColor",
                 fontSize: 12,
               }}
-              unit="°"
             />
 
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1E293B",
-                border: "1px solid #334155",
+                backgroundColor: "rgb(30 41 59)",
+                border: "1px solid rgb(71 85 105)",
                 borderRadius: "12px",
-                color: "#fff",
+                color: "#ffffff",
               }}
               formatter={(value) => [
                 `${Number(value ?? 0)}°C`,
@@ -126,6 +146,7 @@ export default function TemperatureChart({
               }}
               activeDot={{
                 r: 7,
+                fill: "#2563EB",
               }}
             />
           </LineChart>

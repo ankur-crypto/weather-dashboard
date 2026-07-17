@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { getCurrentWeather } from "@/services/weatherApi";
 import { useWeatherStore } from "@/store/weatherStore";
+import { useHistoryStore } from "@/store/historyStore";
 import { WeatherData } from "@/types/weather";
 
 interface Coordinates {
@@ -28,6 +29,10 @@ export function useWeather(
     (state) => state.setWeather
   );
 
+  const addHistory = useHistoryStore(
+    (state) => state.addHistory
+  );
+
   useEffect(() => {
     async function fetchWeather() {
       try {
@@ -42,6 +47,14 @@ export function useWeather(
           await getCurrentWeather(query);
 
         setWeather(result);
+
+        // Save search history
+        addHistory({
+          city: result.location.name,
+          temperature: result.current.temp_c,
+          condition: result.current.condition.text,
+          time: new Date().toLocaleString(),
+        });
       } catch (err) {
         console.error(err);
         setError("Unable to fetch weather.");
@@ -62,7 +75,7 @@ export function useWeather(
     return () => {
       clearInterval(interval);
     };
-  }, [city, coords, setWeather]);
+  }, [city, coords, setWeather, addHistory]);
 
   return {
     data: weather,

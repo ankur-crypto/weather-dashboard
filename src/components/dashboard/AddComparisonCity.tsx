@@ -14,20 +14,35 @@ export default function AddComparisonCity({
   const [city, setCity] = useState("");
 
   return (
-    <div className="mb-6 rounded-3xl border border-slate-700 bg-[#111827]/80 p-6 shadow-xl">
-
+    <div
+      className="
+        mb-6
+        rounded-3xl
+        border
+        border-slate-200
+        bg-white/90
+        p-6
+        shadow-lg
+        backdrop-blur-xl
+        transition-all
+        duration-300
+        dark:border-slate-700
+        dark:bg-[#111827]/80
+        dark:shadow-xl
+      "
+    >
+      {/* Header */}
       <div className="mb-6">
-
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
           Compare Cities
         </h2>
 
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
           Search and compare weather across multiple cities.
         </p>
-
       </div>
 
+      {/* Search */}
       <CityAutocomplete
         value={city}
         onChange={setCity}
@@ -36,7 +51,6 @@ export default function AddComparisonCity({
           setCity("");
         }}
       />
-
     </div>
   );
 }

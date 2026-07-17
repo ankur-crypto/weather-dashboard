@@ -1,27 +1,42 @@
 import { create } from "zustand";
 
-type Unit = "C" | "F";
-
 interface SettingsState {
-  unit: Unit;
+  temperatureUnit: "C" | "F";
+  windUnit: "kph" | "mph";
+  autoRefresh: boolean;
 
-  setUnit: (unit: Unit) => void;
+  setTemperatureUnit: (
+    unit: "C" | "F"
+  ) => void;
 
-  toggleUnit: () => void;
+  setWindUnit: (
+    unit: "kph" | "mph"
+  ) => void;
+
+  toggleAutoRefresh: () => void;
 }
 
 export const useSettingsStore =
   create<SettingsState>((set) => ({
-    unit: "C",
+    temperatureUnit: "C",
+    windUnit: "kph",
+    autoRefresh: true,
 
-    setUnit: (unit) =>
-      set({ unit }),
+    setTemperatureUnit: (
+      temperatureUnit
+    ) =>
+      set({
+        temperatureUnit,
+      }),
 
-    toggleUnit: () =>
+    setWindUnit: (windUnit) =>
+      set({
+        windUnit,
+      }),
+
+    toggleAutoRefresh: () =>
       set((state) => ({
-        unit:
-          state.unit === "C"
-            ? "F"
-            : "C",
+        autoRefresh:
+          !state.autoRefresh,
       })),
   }));

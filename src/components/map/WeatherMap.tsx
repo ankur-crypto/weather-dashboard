@@ -61,12 +61,28 @@ export default function WeatherMap({
   };
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-700 bg-[#111827]">
-
-      <MapToolbar
-        layer={layer}
-        setLayer={setLayer}
-      />
+    <div
+      className="
+        overflow-hidden
+        rounded-3xl
+        border
+        border-slate-200
+        bg-white/90
+        shadow-lg
+        backdrop-blur-xl
+        transition-all
+        duration-300
+        dark:border-slate-700
+        dark:bg-[#111827]/90
+        dark:shadow-xl
+      "
+    >
+      <div className="border-b border-slate-200 dark:border-slate-700">
+        <MapToolbar
+          layer={layer}
+          setLayer={setLayer}
+        />
+      </div>
 
       <MapContainer
         center={[lat, lon]}
@@ -80,7 +96,7 @@ export default function WeatherMap({
         <ScaleControl position="bottomleft" />
 
         <TileLayer
-          attribution="© OpenStreetMap"
+          attribution="© OpenStreetMap contributors"
           url={getTileUrl()}
         />
 
@@ -89,19 +105,22 @@ export default function WeatherMap({
           icon={markerIcon}
         >
           <Popup>
-            <div className="text-center">
-              <h3 className="font-bold">
+            <div className="min-w-[170px] text-center">
+              <h3 className="text-lg font-bold text-slate-800">
                 {city}
               </h3>
 
-              <p>
-                {lat.toFixed(4)}, {lon.toFixed(4)}
+              <p className="mt-2 text-sm text-slate-600">
+                Latitude: {lat.toFixed(4)}
+              </p>
+
+              <p className="text-sm text-slate-600">
+                Longitude: {lon.toFixed(4)}
               </p>
             </div>
           </Popup>
         </Marker>
       </MapContainer>
-
     </div>
   );
 }

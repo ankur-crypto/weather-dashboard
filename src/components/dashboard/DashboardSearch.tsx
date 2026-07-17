@@ -1,9 +1,8 @@
 "use client";
 
-import SearchBar from "../search/SearchBar";
 import FavoriteCities from "../search/FavoriteCities";
 import RecentSearches from "../search/RecentSearches";
-import VoiceSearch from "../search/VoiceSearch";
+import SearchBar from "../search/SearchBar";
 
 interface Props {
   favorites: string[];
@@ -11,13 +10,11 @@ interface Props {
 
   onSearch: (city: string) => void;
 
-  onCurrentLocation: () => void;
-
   onFavoriteSelect: (city: string) => void;
-
   onRecentSelect: (city: string) => void;
 
-  onAddFavorite: () => void;
+  onCurrentLocation: () => Promise<void> | void;
+  locationLoading?: boolean;
 
   onRemoveFavorite: (city: string) => void;
 }
@@ -25,65 +22,35 @@ interface Props {
 export default function DashboardSearch({
   favorites,
   recentSearches,
+
   onSearch,
-  onCurrentLocation,
+
   onFavoriteSelect,
   onRecentSelect,
-  onAddFavorite,
+
+  onCurrentLocation,
+  locationLoading = false,
+
   onRemoveFavorite,
 }: Props) {
   return (
-    <>
-      {/* Search */}
+    <div className="mb-8 space-y-6">
+      <SearchBar
+        onSearch={onSearch}
+        onCurrentLocation={onCurrentLocation}
+        locationLoading={locationLoading}
+      />
 
-      <div className="mb-6">
+      <RecentSearches
+        searches={recentSearches}
+        onSelect={onRecentSelect}
+      />
 
-<div className="flex flex-col gap-4 md:flex-row md:items-center">
-  <div className="flex-1">
-    <SearchBar
-      onSearch={onSearch}
-      onCurrentLocation={onCurrentLocation}
-    />
-  </div>
-
-  <VoiceSearch
-    onResult={onSearch}
-  />
-</div>
-
-        <div className="mt-5">
-
-          <RecentSearches
-            searches={recentSearches}
-            onSelect={onRecentSelect}
-          />
-
-        </div>
-
-        <div className="mt-5">
-
-          <button
-            onClick={onAddFavorite}
-            className="rounded-xl bg-yellow-500 px-5 py-2 font-semibold text-black transition hover:bg-yellow-400"
-          >
-            ⭐ Add to Favorites
-          </button>
-
-        </div>
-
-      </div>
-
-      {/* Favorite Cities */}
-
-      <div className="mb-6">
-
-        <FavoriteCities
-          favorites={favorites}
-          onSelect={onFavoriteSelect}
-          onRemove={onRemoveFavorite}
-        />
-
-      </div>
-    </>
+      <FavoriteCities
+        favorites={favorites}
+        onSelect={onFavoriteSelect}
+        onRemove={onRemoveFavorite}
+      />
+    </div>
   );
 }

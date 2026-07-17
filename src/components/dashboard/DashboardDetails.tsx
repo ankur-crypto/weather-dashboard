@@ -1,9 +1,10 @@
 "use client";
 
 import WeatherDetails from "../weather/WeatherDetails";
+import { WeatherData } from "@/types/weather";
 
 interface Props {
-  weather: any;
+  weather: WeatherData;
 }
 
 export default function DashboardDetails({

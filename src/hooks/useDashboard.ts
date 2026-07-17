@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 
 import { useComparisonCities } from "./useComparisonCities";
 
+import { getCurrentPosition } from "@/services/geolocation";
+
 interface Coordinates {
   lat: number;
   lon: number;
 }
 
 export function useDashboard() {
-  const [city, setCity] =
-    useState("Agartala");
+  const [city, setCity] = useState("Agartala");
 
   const [coords, setCoords] =
     useState<Coordinates | null>(null);
@@ -21,6 +22,12 @@ export function useDashboard() {
 
   const [recentSearches, setRecentSearches] =
     useState<string[]>([]);
+
+  const [locationLoading, setLocationLoading] =
+    useState(false);
+
+  const [locationError, setLocationError] =
+    useState<string | null>(null);
 
   const {
     cities,
@@ -51,10 +58,7 @@ export function useDashboard() {
 
     if (favorites.includes(city)) return;
 
-    const updated = [
-      ...favorites,
-      city,
-    ];
+    const updated = [...favorites, city];
 
     setFavorites(updated);
 
@@ -67,11 +71,9 @@ export function useDashboard() {
   const removeFavorite = (
     cityName: string
   ) => {
-    const updated =
-      favorites.filter(
-        (item) =>
-          item !== cityName
-      );
+    const updated = favorites.filter(
+      (item) => item !== cityName
+    );
 
     setFavorites(updated);
 
@@ -87,8 +89,7 @@ export function useDashboard() {
     const updated = [
       searchedCity,
       ...recentSearches.filter(
-        (item) =>
-          item !== searchedCity
+        (item) => item !== searchedCity
       ),
     ].slice(0, 10);
 
@@ -101,33 +102,34 @@ export function useDashboard() {
   };
 
   const handleCurrentLocation =
-    () => {
-      if (!navigator.geolocation) {
-        alert(
-          "Geolocation is not supported."
-        );
-        return;
+    async () => {
+      try {
+        setLocationLoading(true);
+        setLocationError(null);
+
+        const location =
+          await getCurrentPosition();
+
+        setCoords({
+          lat: location.latitude,
+          lon: location.longitude,
+        });
+
+        // Clear city so useWeather()
+        // uses coordinates instead.
+        setCity("");
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to determine your location.";
+
+        setLocationError(message);
+
+        alert(message);
+      } finally {
+        setLocationLoading(false);
       }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoords({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          });
-
-          setCity("");
-        },
-        () =>
-          alert(
-            "Unable to access your location."
-          ),
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        }
-      );
     };
 
   return {
@@ -146,6 +148,9 @@ export function useDashboard() {
     addRecentSearch,
 
     handleCurrentLocation,
+
+    locationLoading,
+    locationError,
 
     comparisonCities: cities,
     addCity,

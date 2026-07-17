@@ -1,114 +1,206 @@
 "use client";
 
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+  Thermometer,
+  Droplets,
+  Wind,
+  CloudRain,
+  Gauge,
+  Eye,
+} from "lucide-react";
+
+import { WeatherData } from "@/types/weather";
 
 interface Props {
-  weather: any;
+  weather: WeatherData;
 }
 
-export default function TemperatureChart({ weather }: Props) {
+export default function WeatherStats({
+  weather,
+}: Props) {
   if (!weather) return null;
 
-  const chartData = weather.forecast.forecastday[0].hour.map(
-    (hour: any) => ({
-      time: new Date(hour.time).toLocaleTimeString([], {
-        hour: "numeric",
-      }),
-      temp: hour.temp_c,
-      rain: hour.chance_of_rain,
-    })
-  );
+  const current = weather.current;
+
+  const stats = [
+    {
+      title: "Temperature",
+      value: `${current.temp_c}°C`,
+      subtitle: `Feels like ${current.feelslike_c}°`,
+      icon: Thermometer,
+      color: "text-orange-500 dark:text-orange-400",
+    },
+    {
+      title: "Humidity",
+      value: `${current.humidity}%`,
+      subtitle: "Current Humidity",
+      icon: Droplets,
+      color: "text-blue-500 dark:text-blue-400",
+    },
+    {
+      title: "Wind Speed",
+      value: `${current.wind_kph} km/h`,
+      subtitle: current.wind_dir,
+      icon: Wind,
+      color: "text-green-500 dark:text-green-400",
+    },
+    {
+      title: "Rain Chance",
+      value: `${weather.forecast.forecastday[0].day.daily_chance_of_rain}%`,
+      subtitle: "Today",
+      icon: CloudRain,
+      color: "text-cyan-500 dark:text-cyan-400",
+    },
+    {
+      title: "Pressure",
+      value: `${current.pressure_mb} mb`,
+      subtitle: "Atmospheric",
+      icon: Gauge,
+      color: "text-purple-500 dark:text-purple-400",
+    },
+    {
+      title: "Visibility",
+      value: `${current.vis_km} km`,
+      subtitle: "Visibility",
+      icon: Eye,
+      color: "text-indigo-500 dark:text-indigo-400",
+    },
+  ];
 
   return (
-    <div className="rounded-3xl border border-slate-700 bg-[#111827]/90 backdrop-blur-md p-6 shadow-xl">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">
-          24 Hour Temperature
+    <div
+      className="
+        rounded-3xl
+        border
+        border-slate-200
+        bg-white/90
+        p-6
+        shadow-lg
+        backdrop-blur-xl
+        transition-all
+        duration-300
+        dark:border-slate-700
+        dark:bg-[#111827]/90
+        dark:shadow-xl
+      "
+    >
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+          Weather Statistics
         </h2>
 
-        <span className="rounded-lg bg-blue-600 px-3 py-1 text-sm text-white">
-          Today
-        </span>
+        <p className="mt-1 text-slate-500 dark:text-slate-400">
+          Current weather overview
+        </p>
       </div>
 
-      <div className="h-[350px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={chartData}
-            margin={{
-              top: 20,
-              right: 20,
-              left: 0,
-              bottom: 10,
-            }}
-          >
-            <defs>
-              <linearGradient
-                id="tempGradient"
-                x1="0"
-                y1="0"
-                x2="1"
-                y2="0"
-              >
-                <stop offset="0%" stopColor="#38BDF8" />
-                <stop offset="50%" stopColor="#3B82F6" />
-                <stop offset="100%" stopColor="#6366F1" />
-              </linearGradient>
-            </defs>
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
 
-            <CartesianGrid
-              strokeDasharray="4 4"
-              stroke="#334155"
-            />
+          return (
+            <div
+              key={stat.title}
+              className="
+                rounded-2xl
+                border
+                border-slate-200
+                bg-slate-100
+                p-5
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:border-blue-400
+                hover:shadow-lg
+                dark:border-slate-700
+                dark:bg-slate-800
+                dark:hover:border-blue-500
+              "
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {stat.title}
+                  </p>
 
-            <XAxis
-              dataKey="time"
-              stroke="#94A3B8"
-              tick={{ fill: "#CBD5E1", fontSize: 12 }}
-            />
+                  <h3 className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
+                    {stat.value}
+                  </h3>
 
-            <YAxis
-              stroke="#94A3B8"
-              tick={{ fill: "#CBD5E1", fontSize: 12 }}
-              unit="°"
-            />
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    {stat.subtitle}
+                  </p>
+                </div>
 
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#1E293B",
-                border: "1px solid #334155",
-                borderRadius: "12px",
-                color: "#fff",
-              }}
-              formatter={(value) => [
-  `${Number(value ?? 0)}°C`,
-  "Temperature",
-]}
-            />
+                <div className="rounded-2xl bg-slate-200 p-3 dark:bg-slate-700">
+                  <Icon
+                    size={30}
+                    className={stat.color}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-            <Line
-              type="monotone"
-              dataKey="temp"
-              stroke="url(#tempGradient)"
-              strokeWidth={4}
-              dot={{
-                r: 4,
-                fill: "#3B82F6",
-              }}
-              activeDot={{
-                r: 7,
-              }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+      <div
+        className="
+          mt-8
+          rounded-2xl
+          border
+          border-slate-200
+          bg-slate-100
+          p-6
+          dark:border-slate-700
+          dark:bg-slate-800
+        "
+      >
+        <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">
+          Summary
+        </h3>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <p className="text-slate-600 dark:text-slate-400">
+              Condition
+            </p>
+
+            <h4 className="font-semibold text-slate-900 dark:text-white">
+              {current.condition.text}
+            </h4>
+          </div>
+
+          <div>
+            <p className="text-slate-600 dark:text-slate-400">
+              UV Index
+            </p>
+
+            <h4 className="font-semibold text-slate-900 dark:text-white">
+              {current.uv}
+            </h4>
+          </div>
+
+          <div>
+            <p className="text-slate-600 dark:text-slate-400">
+              Cloud Cover
+            </p>
+
+            <h4 className="font-semibold text-slate-900 dark:text-white">
+              {current.cloud}%
+            </h4>
+          </div>
+
+          <div>
+            <p className="text-slate-600 dark:text-slate-400">
+              Precipitation
+            </p>
+
+            <h4 className="font-semibold text-slate-900 dark:text-white">
+              {current.precip_mm} mm
+            </h4>
+          </div>
+        </div>
       </div>
     </div>
   );

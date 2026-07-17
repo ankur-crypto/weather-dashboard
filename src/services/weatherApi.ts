@@ -1,11 +1,18 @@
+import { WeatherData } from "@/types/weather";
+
 const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
 
 const BASE_URL = "https://api.weatherapi.com/v1";
 
 /**
  * Get current weather + 7-day forecast
+ * Accepts:
+ * - City name ("Agartala")
+ * - Coordinates ("23.8315,91.2868")
  */
-export async function getCurrentWeather(query: string) {
+export async function getCurrentWeather(
+  query: string
+): Promise<WeatherData> {
   const response = await fetch(
     `${BASE_URL}/forecast.json?key=${API_KEY}&q=${encodeURIComponent(
       query
@@ -19,7 +26,8 @@ export async function getCurrentWeather(query: string) {
     const error = await response.json();
 
     throw new Error(
-      error.error?.message || "Failed to fetch weather."
+      error.error?.message ??
+        "Failed to fetch weather."
     );
   }
 
@@ -29,16 +37,18 @@ export async function getCurrentWeather(query: string) {
 /**
  * Search cities for autocomplete
  */
-export async function searchCities(query: string) {
+export async function searchCities(
+  query: string
+) {
   if (!query.trim()) return [];
 
   const response = await fetch(
-    `${BASE_URL}/search.json?key=${API_KEY}&q=${encodeURIComponent(query)}`
+    `${BASE_URL}/search.json?key=${API_KEY}&q=${encodeURIComponent(
+      query
+    )}`
   );
 
-  if (!response.ok) {
-    return [];
-  }
+  if (!response.ok) return [];
 
   return response.json();
 }

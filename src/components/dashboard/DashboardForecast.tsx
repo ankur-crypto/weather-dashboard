@@ -1,9 +1,10 @@
 "use client";
 
 import WeeklyForecast from "../weather/WeeklyForecast";
+import { WeatherData } from "@/types/weather";
 
 interface Props {
-  weather: any;
+  weather: WeatherData;
 }
 
 export default function DashboardForecast({
