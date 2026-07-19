@@ -1,13 +1,31 @@
 "use client";
 
 import { Wind } from "lucide-react";
+
 import { WeatherData } from "@/types/weather";
+import { useSettingsStore } from "@/store/settingsStore";
+import { formatWindSpeed } from "@/utils/weatherUnits";
 
 interface Props {
   weather: WeatherData;
 }
 
-export default function WindCard({ weather }: Props) {
+export default function WindCard({
+  weather,
+}: Props) {
+  /*
+   * Current Weather
+   */
+  const current =
+    weather.current;
+
+  /*
+   * Settings
+   */
+  const {
+    windUnit,
+  } = useSettingsStore();
+
   return (
     <div
       className="
@@ -25,9 +43,13 @@ export default function WindCard({ weather }: Props) {
         dark:bg-[#111827]/80
       "
     >
+      {/* Header */}
+
       <h2 className="mb-6 text-xl font-semibold text-slate-900 dark:text-white">
         Wind
       </h2>
+
+      {/* Wind Icon */}
 
       <div className="flex items-center justify-center">
         <div className="rounded-full border-4 border-cyan-400 p-8">
@@ -38,16 +60,25 @@ export default function WindCard({ weather }: Props) {
         </div>
       </div>
 
+      {/* Wind Information */}
+
       <div className="mt-8 space-y-4">
+        {/* Speed */}
+
         <div className="flex items-center justify-between">
           <span className="text-slate-600 dark:text-slate-400">
             Speed
           </span>
 
           <span className="font-semibold text-slate-900 dark:text-white">
-            {weather.current.wind_kph} km/h
+            {formatWindSpeed(
+              current.wind_kph,
+              windUnit
+            )}
           </span>
         </div>
+
+        {/* Direction */}
 
         <div className="flex items-center justify-between">
           <span className="text-slate-600 dark:text-slate-400">
@@ -55,9 +86,11 @@ export default function WindCard({ weather }: Props) {
           </span>
 
           <span className="font-semibold text-slate-900 dark:text-white">
-            {weather.current.wind_dir}
+            {current.wind_dir}
           </span>
         </div>
+
+        {/* Pressure */}
 
         <div className="flex items-center justify-between">
           <span className="text-slate-600 dark:text-slate-400">
@@ -65,7 +98,7 @@ export default function WindCard({ weather }: Props) {
           </span>
 
           <span className="font-semibold text-slate-900 dark:text-white">
-            {weather.current.pressure_mb} mb
+            {current.pressure_mb} hPa
           </span>
         </div>
       </div>

@@ -29,7 +29,6 @@ export default function Dashboard() {
     favorites,
     recentSearches,
 
-    addFavorite,
     removeFavorite,
 
     addRecentSearch,
@@ -42,12 +41,81 @@ export default function Dashboard() {
     removeCity,
   } = useDashboard();
 
+  /*
+   * Fetch weather using either:
+   *
+   * 1. City name
+   * 2. Latitude + Longitude
+   */
   const {
     data,
     loading,
     error,
-  } = useWeather(city, coords);
+  } = useWeather(
+    city,
+    coords
+  );
 
+  /*
+   * Search city
+   * Favorite city
+   * Recent city
+   * Comparison city
+   */
+  const handleCitySelect = (
+    selectedCity: string
+  ) => {
+    /*
+     * Clear coordinates so useWeather
+     * switches back to city search.
+     */
+    setCoords(null);
+
+    setCity(
+      selectedCity
+    );
+
+    /*
+     * Update global weather store city.
+     */
+    setGlobalCity(
+      selectedCity
+    );
+
+    /*
+     * Save to recent searches.
+     */
+    addRecentSearch(
+      selectedCity
+    );
+  };
+
+  /*
+   * Map location selection
+   *
+   * When user clicks anywhere on the map,
+   * clear the city and fetch weather using
+   * latitude and longitude.
+   */
+  const handleMapLocationSelect = (
+    lat: number,
+    lon: number
+  ) => {
+    /*
+     * Clear city so useWeather()
+     * uses coordinates.
+     */
+    setCity("");
+
+    setCoords({
+      lat,
+      lon,
+    });
+  };
+
+  /*
+   * Loading State
+   */
   if (loading) {
     return (
       <section className="flex-1 p-4 sm:p-6 lg:p-8">
@@ -56,6 +124,9 @@ export default function Dashboard() {
     );
   }
 
+  /*
+   * Error State
+   */
   if (error) {
     return (
       <section className="flex flex-1 items-center justify-center p-6">
@@ -74,7 +145,9 @@ export default function Dashboard() {
             dark:bg-[#111827]/90
           "
         >
-          <div className="mb-4 text-5xl">⚠️</div>
+          <div className="mb-4 text-5xl">
+            ⚠️
+          </div>
 
           <h2 className="mb-2 text-2xl font-bold text-red-600 dark:text-red-400">
             Unable to load weather
@@ -88,20 +161,20 @@ export default function Dashboard() {
     );
   }
 
-  if (!data) return null;
+  /*
+   * No Weather Data
+   */
+  if (!data) {
+    return null;
+  }
 
-  const theme = getWeatherTheme(
-    data.current.condition.text
-  );
-
-  const handleCitySelect = (
-    selectedCity: string
-  ) => {
-    setCoords(null);
-    setCity(selectedCity);
-    setGlobalCity(selectedCity);
-    addRecentSearch(selectedCity);
-  };
+  /*
+   * Dynamic weather theme
+   */
+  const theme =
+    getWeatherTheme(
+      data.current.condition.text
+    );
 
   return (
     <section
@@ -118,32 +191,83 @@ export default function Dashboard() {
         lg:p-8
       `}
     >
+      {/* Dynamic Weather Effects */}
+
       <WeatherEffects
-        condition={data.current.condition.text}
+        condition={
+          data.current.condition.text
+        }
       />
 
+      {/* Dashboard Content */}
+
       <div className="relative z-10">
+        {/* Header */}
+
         <Header />
 
- <DashboardSearch
-  favorites={favorites}
-  recentSearches={recentSearches}
-  onSearch={handleCitySelect}
-  onFavoriteSelect={handleCitySelect}
-  onRecentSelect={handleCitySelect}
-  onCurrentLocation={handleCurrentLocation}
-  locationLoading={locationLoading}
-  onRemoveFavorite={removeFavorite}
-/>
+        {/* Search */}
+
+        <DashboardSearch
+          favorites={
+            favorites
+          }
+          recentSearches={
+            recentSearches
+          }
+          onSearch={
+            handleCitySelect
+          }
+          onFavoriteSelect={
+            handleCitySelect
+          }
+          onRecentSelect={
+            handleCitySelect
+          }
+          onCurrentLocation={
+            handleCurrentLocation
+          }
+          locationLoading={
+            locationLoading
+          }
+          onRemoveFavorite={
+            removeFavorite
+          }
+        />
+
+        {/* Main Dashboard */}
 
         <DashboardMain
-          weather={data}
-          favoriteCount={favorites.length}
-          comparisonCities={comparisonCities}
-          addCity={addCity}
-          removeCity={removeCity}
-          onCitySelect={handleCitySelect}
+          weather={
+            data
+          }
+          favoriteCount={
+            favorites.length
+          }
+          comparisonCities={
+            comparisonCities
+          }
+          addCity={
+            addCity
+          }
+          removeCity={
+            removeCity
+          }
+          onCitySelect={
+            handleCitySelect
+          }
+          onLocationSelect={
+            handleMapLocationSelect
+          }
+          onCurrentLocation={
+            handleCurrentLocation
+          }
+          locationLoading={
+            locationLoading
+          }
         />
+
+        {/* Footer */}
 
         <DashboardFooter />
       </div>

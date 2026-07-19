@@ -17,13 +17,17 @@ export default function DashboardCharts({
       {/* Temperature Chart */}
 
       <div className="mt-6">
-        <TemperatureChart weather={weather} />
+        <TemperatureChart
+          weather={weather}
+        />
       </div>
 
       {/* Weather Statistics */}
 
       <div className="mt-6">
-        <WeatherStats weather={weather} />
+        <WeatherStats
+          weather={weather}
+        />
       </div>
     </>
   );

@@ -13,68 +13,142 @@ import {
 
 import { WeatherData } from "@/types/weather";
 
+import { useSettingsStore } from "@/store/settingsStore";
+
+import {
+  formatTemperature,
+  formatWindSpeed,
+} from "@/utils/weatherUnits";
+
 interface Props {
   weather: WeatherData;
 }
 
-export default function WeatherDetails({ weather }: Props) {
-  if (!weather) return null;
+export default function WeatherDetails({
+  weather,
+}: Props) {
+  /*
+   * Current Weather
+   */
+  const current =
+    weather.current;
 
-  const current = weather.current;
+  /*
+   * Global Settings
+   */
+  const {
+    temperatureUnit,
+    windUnit,
+  } = useSettingsStore();
 
+  /*
+   * Weather Details
+   */
   const details = [
     {
       title: "Feels Like",
-      value: `${current.feelslike_c}°C`,
+
+      value: formatTemperature(
+        current.feelslike_c,
+        temperatureUnit
+      ),
+
       icon: Thermometer,
-      color: "text-red-500 dark:text-red-400",
+
+      color:
+        "text-red-500 dark:text-red-400",
     },
+
     {
       title: "Humidity",
-      value: `${current.humidity}%`,
+
+      value:
+        `${current.humidity}%`,
+
       icon: Droplets,
-      color: "text-blue-500 dark:text-blue-400",
+
+      color:
+        "text-blue-500 dark:text-blue-400",
     },
+
     {
       title: "Visibility",
-      value: `${current.vis_km} km`,
+
+      value:
+        `${current.vis_km} km`,
+
       icon: Eye,
-      color: "text-cyan-500 dark:text-cyan-400",
+
+      color:
+        "text-cyan-500 dark:text-cyan-400",
     },
+
     {
       title: "Pressure",
-      value: `${current.pressure_mb} mb`,
+
+      value:
+        `${current.pressure_mb} hPa`,
+
       icon: Gauge,
-      color: "text-yellow-500 dark:text-yellow-400",
+
+      color:
+        "text-yellow-500 dark:text-yellow-400",
     },
+
     {
       title: "Wind",
-      value: `${current.wind_kph} km/h`,
+
+      value:
+        formatWindSpeed(
+          current.wind_kph,
+          windUnit
+        ),
+
       icon: Wind,
-      color: "text-green-500 dark:text-green-400",
+
+      color:
+        "text-green-500 dark:text-green-400",
     },
+
     {
       title: "Rain",
-      value: `${current.precip_mm} mm`,
+
+      value:
+        `${current.precip_mm} mm`,
+
       icon: CloudRain,
-      color: "text-indigo-500 dark:text-indigo-400",
+
+      color:
+        "text-indigo-500 dark:text-indigo-400",
     },
+
     {
       title: "UV Index",
-      value: current.uv,
+
+      value:
+        `${current.uv}`,
+
       icon: Sun,
-      color: "text-orange-500 dark:text-orange-400",
+
+      color:
+        "text-orange-500 dark:text-orange-400",
     },
+
     {
       title: "Condition",
-      value: current.condition.text,
+
+      value:
+        current.condition.text,
+
       icon: Cloud,
-      color: "text-sky-500 dark:text-sky-400",
+
+      color:
+        "text-sky-500 dark:text-sky-400",
     },
   ];
 
   return (
-    <div
+    <section
       className="
         rounded-3xl
         border
@@ -90,6 +164,8 @@ export default function WeatherDetails({ weather }: Props) {
         dark:shadow-xl
       "
     >
+      {/* Header */}
+
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
           Weather Details
@@ -100,51 +176,70 @@ export default function WeatherDetails({ weather }: Props) {
         </p>
       </div>
 
+      {/* Weather Details Grid */}
+
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {details.map((item) => {
-          const Icon = item.icon;
+        {details.map(
+          (item) => {
+            const Icon =
+              item.icon;
 
-          return (
-            <div
-              key={item.title}
-              className="
-                rounded-2xl
-                border
-                border-slate-200
-                bg-slate-100
-                p-5
-                transition-all
-                duration-300
-                hover:-translate-y-1
-                hover:border-blue-400
-                hover:shadow-lg
-                dark:border-slate-700
-                dark:bg-slate-800
-                dark:hover:border-blue-500
-              "
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <Icon
-                  size={28}
-                  className={item.color}
-                />
+            return (
+              <div
+                key={
+                  item.title
+                }
+                className="
+                  rounded-2xl
+                  border
+                  border-slate-200
+                  bg-slate-100
+                  p-5
+                  transition-all
+                  duration-300
+                  hover:-translate-y-1
+                  hover:border-blue-400
+                  hover:shadow-lg
+                  dark:border-slate-700
+                  dark:bg-slate-800
+                  dark:hover:border-blue-500
+                "
+              >
+                {/* Icon + Live Badge */}
 
-                <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
-                  Live
-                </span>
+                <div className="mb-4 flex items-center justify-between">
+                  <Icon
+                    size={28}
+                    className={
+                      item.color
+                    }
+                  />
+
+                  <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                    Live
+                  </span>
+                </div>
+
+                {/* Title */}
+
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {
+                    item.title
+                  }
+                </p>
+
+                {/* Value */}
+
+                <h3 className="mt-2 break-words text-2xl font-bold text-slate-900 dark:text-white">
+                  {
+                    item.value
+                  }
+                </h3>
               </div>
-
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {item.title}
-              </p>
-
-              <h3 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white break-words">
-                {item.value}
-              </h3>
-            </div>
-          );
-        })}
+            );
+          }
+        )}
       </div>
-    </div>
+    </section>
   );
 }

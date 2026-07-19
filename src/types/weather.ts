@@ -40,7 +40,7 @@ export interface Current {
 
   condition: Condition;
 
-  air_quality: AirQuality;
+  air_quality?: AirQuality;
 }
 
 export interface Day {
@@ -91,9 +91,30 @@ export interface Location {
   lon: number;
   localtime: string;
 }
+export interface WeatherAlert {
+  headline: string;
+  msgtype: string;
+  severity: string;
+  urgency: string;
+  areas: string;
+  category: string;
+  certainty: string;
+  event: string;
+  note: string;
+  effective: string;
+  expires: string;
+  desc: string;
+  instruction: string;
+}
+
+export interface Alerts {
+  alert: WeatherAlert[];
+}
 
 export interface WeatherData {
   location: Location;
   current: Current;
   forecast: Forecast;
+
+  alerts?: Alerts;
 }

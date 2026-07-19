@@ -6,11 +6,23 @@ import {
   MapPin,
   Thermometer,
   Trash2,
+  Search,
 } from "lucide-react";
 
 import { useHistoryStore } from "@/store/historyStore";
+import { useSettingsStore } from "@/store/settingsStore";
+import { formatTemperature } from "@/utils/weatherUnits";
 
-export default function WeatherHistory() {
+interface Props {
+  onCitySelect: (city: string) => void;
+}
+
+export default function WeatherHistory({
+  onCitySelect,
+}: Props) {
+  /*
+   * Weather History
+   */
   const history = useHistoryStore(
     (state) => state.history
   );
@@ -18,6 +30,34 @@ export default function WeatherHistory() {
   const clearHistory = useHistoryStore(
     (state) => state.clearHistory
   );
+
+  /*
+   * Temperature Setting
+   */
+  const temperatureUnit =
+    useSettingsStore(
+      (state) =>
+        state.temperatureUnit
+    );
+
+  /*
+   * Load weather again
+   * for selected history city.
+   */
+  const handleCitySelect = (
+    city: string
+  ) => {
+    onCitySelect(city);
+
+    /*
+     * Scroll to top of dashboard
+     * after selecting city.
+     */
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <section
@@ -56,12 +96,16 @@ export default function WeatherHistory() {
           </div>
         </div>
 
+        {/* Clear History */}
+
         {history.length > 0 && (
           <button
+            type="button"
             onClick={clearHistory}
             className="
               inline-flex
               items-center
+              justify-center
               gap-2
               rounded-2xl
               bg-red-500
@@ -78,6 +122,7 @@ export default function WeatherHistory() {
             "
           >
             <Trash2 size={16} />
+
             Clear History
           </button>
         )}
@@ -109,63 +154,126 @@ export default function WeatherHistory() {
           </h3>
 
           <p className="mt-3 text-slate-500 dark:text-slate-400">
-            Search for a city to start building your
-            weather history.
+            Search for a city to start
+            building your weather history.
           </p>
         </div>
       ) : (
+        /* History List */
+
         <div className="space-y-5">
-          {history.map((item, index) => (
-            <article
-              key={`${item.city}-${item.time}-${index}`}
-              className="
-                group
-                rounded-3xl
-                border
-                border-slate-200
-                bg-slate-50
-                p-5
-                transition-all
-                duration-300
-                hover:-translate-y-1
-                hover:border-cyan-400
-                hover:shadow-lg
-                dark:border-slate-700
-                dark:bg-slate-800
-                dark:hover:border-cyan-500
-              "
-            >
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
-                    <MapPin
-                      size={20}
-                      className="text-cyan-500"
-                    />
-                    {item.city}
-                  </div>
+          {history.map(
+            (item, index) => (
+              <article
+                key={`${item.city}-${item.time}-${index}`}
+                className="
+                  group
+                  rounded-3xl
+                  border
+                  border-slate-200
+                  bg-slate-50
+                  p-5
+                  transition-all
+                  duration-300
+                  hover:-translate-y-1
+                  hover:border-cyan-400
+                  hover:shadow-lg
+                  dark:border-slate-700
+                  dark:bg-slate-800
+                  dark:hover:border-cyan-500
+                "
+              >
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                  {/* City Information */}
 
-                  <div className="mt-5 flex flex-wrap gap-6">
-                    <div className="flex items-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-sm font-medium text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
-                      <Thermometer size={16} />
-                      {item.temperature}°C
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
+                      <MapPin
+                        size={20}
+                        className="text-cyan-500"
+                      />
+
+                      {item.city}
                     </div>
 
-                    <div className="flex items-center gap-2 rounded-full bg-sky-100 px-4 py-2 text-sm font-medium text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
-                      <Cloud size={16} />
-                      {item.condition}
+                    {/* Weather Information */}
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      {/* Temperature */}
+
+                      <div className="flex items-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-sm font-medium text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+                        <Thermometer
+                          size={16}
+                        />
+
+                        {formatTemperature(
+                          item.temperature,
+                          temperatureUnit
+                        )}
+                      </div>
+
+                      {/* Condition */}
+
+                      <div className="flex items-center gap-2 rounded-full bg-sky-100 px-4 py-2 text-sm font-medium text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
+                        <Cloud
+                          size={16}
+                        />
+
+                        {item.condition}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">
-                  {item.time}
+                  {/* Right Section */}
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    {/* Search Time */}
+
+                    <div className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                      {item.time}
+                    </div>
+
+                    {/* View Weather */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCitySelect(
+                          item.city
+                        )
+                      }
+                      className="
+                        inline-flex
+                        items-center
+                        justify-center
+                        gap-2
+                        rounded-2xl
+                        bg-cyan-600
+                        px-4
+                        py-3
+                        text-sm
+                        font-semibold
+                        text-white
+                        transition-all
+                        duration-300
+                        hover:-translate-y-0.5
+                        hover:bg-cyan-700
+                        hover:shadow-lg
+                      "
+                    >
+                      <Search
+                        size={16}
+                      />
+
+                      View Weather
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            )
+          )}
         </div>
       )}
     </section>
   );
-} 
+}

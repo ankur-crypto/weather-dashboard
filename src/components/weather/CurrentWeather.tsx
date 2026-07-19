@@ -11,7 +11,14 @@ import {
 } from "lucide-react";
 
 import { WeatherData } from "@/types/weather";
+
 import { useFavoriteStore } from "@/store/favoriteStore";
+import { useSettingsStore } from "@/store/settingsStore";
+
+import {
+  formatTemperature,
+  formatWindSpeed,
+} from "@/utils/weatherUnits";
 
 interface Props {
   weather: WeatherData;
@@ -20,26 +27,66 @@ interface Props {
 export default function CurrentWeather({
   weather,
 }: Props) {
-  if (!weather) return null;
-
+  /*
+   * Weather Data
+   */
   const current = weather.current;
   const location = weather.location;
 
+  /*
+   * Favorite Store
+   */
   const {
     addFavorite,
     removeFavorite,
     isFavorite,
   } = useFavoriteStore();
 
-  const favorite = isFavorite(location.name);
+  /*
+   * Settings Store
+   */
+  const {
+    temperatureUnit,
+    windUnit,
+  } = useSettingsStore();
 
+  /*
+   * Check if current city
+   * is already a favorite
+   */
+  const favorite =
+    isFavorite(location.name);
+
+  /*
+   * Add / Remove Favorite
+   */
   const handleFavorite = () => {
     if (favorite) {
-      removeFavorite(location.name);
+      removeFavorite(
+        location.name
+      );
     } else {
-      addFavorite(location.name);
+      addFavorite(
+        location.name
+      );
     }
   };
+
+  /*
+   * WeatherAPI sometimes returns:
+   *
+   * //cdn.weatherapi.com/...
+   *
+   * Convert it to:
+   *
+   * https://cdn.weatherapi.com/...
+   */
+  const weatherIcon =
+    current.condition.icon.startsWith(
+      "//"
+    )
+      ? `https:${current.condition.icon}`
+      : current.condition.icon;
 
   return (
     <div
@@ -61,19 +108,24 @@ export default function CurrentWeather({
             rgba(8,15,30,.55),
             rgba(8,15,30,.75)
           ),
-          url("https:${current.condition.icon}")
+          url("${weatherIcon}")
         `,
       }}
     >
       {/* Header */}
 
       <div className="flex items-start justify-between gap-4">
+        {/* Location */}
+
         <div>
           <div className="flex items-center gap-2 text-slate-200">
-            <MapPin size={18} />
+            <MapPin
+              size={18}
+            />
 
             <span>
-              {location.name}, {location.country}
+              {location.name},{" "}
+              {location.country}
             </span>
           </div>
 
@@ -82,9 +134,14 @@ export default function CurrentWeather({
           </p>
         </div>
 
+        {/* Favorite + Weather Icon */}
+
         <div className="flex items-center gap-3">
           <button
-            onClick={handleFavorite}
+            type="button"
+            onClick={
+              handleFavorite
+            }
             className="
               flex
               items-center
@@ -102,11 +159,15 @@ export default function CurrentWeather({
           >
             <Star
               size={20}
-              className={`transition-all duration-300 ${
-                favorite
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "text-white"
-              }`}
+              className={`
+                transition-all
+                duration-300
+                ${
+                  favorite
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-white"
+                }
+              `}
             />
 
             <span className="text-sm font-medium">
@@ -117,8 +178,11 @@ export default function CurrentWeather({
           </button>
 
           <img
-            src={`https:${current.condition.icon}`}
-            alt={current.condition.text}
+            src={weatherIcon}
+            alt={
+              current.condition
+                .text
+            }
             className="h-28 w-28"
           />
         </div>
@@ -128,21 +192,33 @@ export default function CurrentWeather({
 
       <div className="mt-10">
         <h1 className="text-7xl font-bold">
-          {current.temp_c}°
+          {formatTemperature(
+            current.temp_c,
+            temperatureUnit
+          )}
         </h1>
 
         <p className="mt-2 text-2xl">
-          {current.condition.text}
+          {
+            current.condition
+              .text
+          }
         </p>
 
         <p className="mt-1 text-slate-300">
-          Feels like {current.feelslike_c}°
+          Feels like{" "}
+          {formatTemperature(
+            current.feelslike_c,
+            temperatureUnit
+          )}
         </p>
       </div>
 
       {/* Weather Stats */}
 
       <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-5">
+        {/* Wind */}
+
         <div>
           <Wind
             className="mb-2 text-cyan-300"
@@ -154,9 +230,14 @@ export default function CurrentWeather({
           </p>
 
           <h3 className="font-semibold">
-            {current.wind_kph} km/h
+            {formatWindSpeed(
+              current.wind_kph,
+              windUnit
+            )}
           </h3>
         </div>
+
+        {/* Humidity */}
 
         <div>
           <Droplets
@@ -173,6 +254,8 @@ export default function CurrentWeather({
           </h3>
         </div>
 
+        {/* Rain */}
+
         <div>
           <CloudRain
             className="mb-2 text-sky-300"
@@ -184,9 +267,12 @@ export default function CurrentWeather({
           </p>
 
           <h3 className="font-semibold">
-            {current.precip_mm} mm
+            {current.precip_mm}{" "}
+            mm
           </h3>
         </div>
+
+        {/* Visibility */}
 
         <div>
           <Eye
@@ -199,9 +285,12 @@ export default function CurrentWeather({
           </p>
 
           <h3 className="font-semibold">
-            {current.vis_km} km
+            {current.vis_km}{" "}
+            km
           </h3>
         </div>
+
+        {/* Pressure */}
 
         <div>
           <Gauge
@@ -214,7 +303,10 @@ export default function CurrentWeather({
           </p>
 
           <h3 className="font-semibold">
-            {current.pressure_mb} hPa
+            {
+              current.pressure_mb
+            }{" "}
+            hPa
           </h3>
         </div>
       </div>

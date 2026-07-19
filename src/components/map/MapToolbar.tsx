@@ -1,9 +1,25 @@
+"use client";
+
 interface Props {
-  layer: string;
-  setLayer: (layer: string) => void;
+  layer: MapLayer;
+  setLayer: (
+    layer: MapLayer
+  ) => void;
 }
 
-const layers = [
+export type MapLayer =
+  | "street"
+  | "satellite"
+  | "rain"
+  | "clouds"
+  | "temp";
+
+interface LayerItem {
+  id: MapLayer;
+  label: string;
+}
+
+const layers: LayerItem[] = [
   {
     id: "street",
     label: "🗺 Street",
@@ -36,18 +52,24 @@ export default function MapToolbar({
         flex
         flex-wrap
         gap-3
-        p-4
         bg-slate-50
+        p-4
         dark:bg-slate-900/40
       "
     >
       {layers.map((item) => {
-        const active = layer === item.id;
+        const active =
+          layer === item.id;
 
         return (
           <button
             key={item.id}
-            onClick={() => setLayer(item.id)}
+            type="button"
+            onClick={() =>
+              setLayer(
+                item.id
+              )
+            }
             className={`
               rounded-xl
               px-4

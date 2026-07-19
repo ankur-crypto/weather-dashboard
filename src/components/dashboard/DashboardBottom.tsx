@@ -15,38 +15,99 @@ import { WeatherData } from "@/types/weather";
 
 interface Props {
   weather: WeatherData;
+
+  comparisonCities: string[];
+
+  onCitySelect: (
+    city: string
+  ) => void;
+
+  onLocationSelect: (
+    lat: number,
+    lon: number
+  ) => void;
+
+  onCurrentLocation: () =>
+    Promise<void> | void;
+
+  locationLoading?: boolean;
 }
 
 export default function DashboardBottom({
   weather,
+  comparisonCities,
+  onCitySelect,
+  onLocationSelect,
+  onCurrentLocation,
+  locationLoading = false,
 }: Props) {
   return (
     <>
       {/* Weather Charts */}
-      <DashboardCharts weather={weather} />
+
+      <DashboardCharts
+        weather={weather}
+      />
 
       {/* Weather Details */}
-      <DashboardDetails weather={weather} />
+
+      <DashboardDetails
+        weather={weather}
+      />
 
       {/* Today's Highlights */}
-      <DashboardHighlights weather={weather} />
+
+      <DashboardHighlights
+        weather={weather}
+      />
 
       {/* Weather Map */}
-      <DashboardMap weather={weather} />
+
+      <DashboardMap
+        weather={weather}
+        comparisonCities={
+          comparisonCities
+        }
+        onCitySelect={
+          onCitySelect
+        }
+        onLocationSelect={
+          onLocationSelect
+        }
+        onCurrentLocation={
+          onCurrentLocation
+        }
+        locationLoading={
+          locationLoading
+        }
+      />
 
       {/* AI Assistant & Notifications */}
+
       <div className="mt-8 grid gap-6 xl:grid-cols-2">
-        <WeatherAssistant weather={weather} />
-        <WeatherNotifications weather={weather} />
+        <WeatherAssistant
+          weather={weather}
+        />
+
+        <WeatherNotifications
+          weather={weather}
+        />
       </div>
 
       {/* Weather News */}
-      <WeatherNews city={weather.location.name} />
+
+      <WeatherNews
+        city={weather.location.name}
+      />
 
       {/* Weather History */}
-      <WeatherHistory />
+
+      <WeatherHistory
+  onCitySelect={onCitySelect}
+/>
 
       {/* Settings */}
+
       <SettingsPanel />
     </>
   );

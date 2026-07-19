@@ -18,6 +18,16 @@ interface Props {
   removeCity: (city: string) => void;
 
   onCitySelect: (city: string) => void;
+
+  onLocationSelect: (
+    lat: number,
+    lon: number
+  ) => void;
+
+  onCurrentLocation: () =>
+    Promise<void> | void;
+
+  locationLoading?: boolean;
 }
 
 export default function DashboardMain({
@@ -27,9 +37,14 @@ export default function DashboardMain({
   addCity,
   removeCity,
   onCitySelect,
+  onLocationSelect,
+  onCurrentLocation,
+  locationLoading = false,
 }: Props) {
   return (
     <>
+      {/* Dashboard Top */}
+
       <DashboardTop
         weather={weather}
         favoriteCount={favoriteCount}
@@ -39,12 +54,21 @@ export default function DashboardMain({
         onCitySelect={onCitySelect}
       />
 
+      {/* Dashboard Center */}
+
       <DashboardCenter
         weather={weather}
       />
 
+      {/* Dashboard Bottom */}
+
       <DashboardBottom
         weather={weather}
+        comparisonCities={comparisonCities}
+        onCitySelect={onCitySelect}
+        onLocationSelect={onLocationSelect}
+        onCurrentLocation={onCurrentLocation}
+        locationLoading={locationLoading}
       />
     </>
   );
