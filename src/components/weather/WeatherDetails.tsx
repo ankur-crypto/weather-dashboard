@@ -11,8 +11,9 @@ import {
   Cloud,
 } from "lucide-react";
 
-import { WeatherData } from "@/types/weather";
+import type { ElementType } from "react";
 
+import { WeatherData } from "@/types/weather";
 import { useSettingsStore } from "@/store/settingsStore";
 
 import {
@@ -22,6 +23,16 @@ import {
 
 interface Props {
   weather: WeatherData;
+}
+
+interface WeatherDetail {
+  title: string;
+  value: string;
+  description: string;
+  icon: ElementType;
+  iconColor: string;
+  iconBackground: string;
+  hoverBorder: string;
 }
 
 export default function WeatherDetails({
@@ -42,21 +53,111 @@ export default function WeatherDetails({
   } = useSettingsStore();
 
   /*
+   * Humidity Status
+   */
+  const getHumidityStatus = (
+    humidity: number
+  ) => {
+    if (humidity >= 80) {
+      return "High humidity";
+    }
+
+    if (humidity >= 40) {
+      return "Comfortable humidity";
+    }
+
+    return "Low humidity";
+  };
+
+  /*
+   * Visibility Status
+   */
+  const getVisibilityStatus = (
+    visibility: number
+  ) => {
+    if (visibility <= 1) {
+      return "Very low visibility";
+    }
+
+    if (visibility <= 5) {
+      return "Reduced visibility";
+    }
+
+    return "Good visibility";
+  };
+
+  /*
+   * UV Status
+   */
+  const getUVStatus = (
+    uv: number
+  ) => {
+    if (uv <= 2) {
+      return "Low UV exposure";
+    }
+
+    if (uv <= 5) {
+      return "Moderate UV exposure";
+    }
+
+    if (uv <= 7) {
+      return "High UV exposure";
+    }
+
+    if (uv <= 10) {
+      return "Very high UV exposure";
+    }
+
+    return "Extreme UV exposure";
+  };
+
+  /*
+   * Rain Status
+   */
+  const getRainStatus = (
+    precipitation: number
+  ) => {
+    if (precipitation === 0) {
+      return "No current precipitation";
+    }
+
+    if (precipitation < 2.5) {
+      return "Light precipitation";
+    }
+
+    if (precipitation < 10) {
+      return "Moderate precipitation";
+    }
+
+    return "Heavy precipitation";
+  };
+
+  /*
    * Weather Details
    */
-  const details = [
+  const details: WeatherDetail[] = [
     {
       title: "Feels Like",
 
-      value: formatTemperature(
-        current.feelslike_c,
-        temperatureUnit
-      ),
+      value:
+        formatTemperature(
+          current.feelslike_c,
+          temperatureUnit
+        ),
+
+      description:
+        "Apparent temperature",
 
       icon: Thermometer,
 
-      color:
+      iconColor:
         "text-red-500 dark:text-red-400",
+
+      iconBackground:
+        "bg-red-100 dark:bg-red-900/30",
+
+      hoverBorder:
+        "hover:border-red-400 dark:hover:border-red-500",
     },
 
     {
@@ -65,10 +166,21 @@ export default function WeatherDetails({
       value:
         `${current.humidity}%`,
 
+      description:
+        getHumidityStatus(
+          current.humidity
+        ),
+
       icon: Droplets,
 
-      color:
+      iconColor:
         "text-blue-500 dark:text-blue-400",
+
+      iconBackground:
+        "bg-blue-100 dark:bg-blue-900/30",
+
+      hoverBorder:
+        "hover:border-blue-400 dark:hover:border-blue-500",
     },
 
     {
@@ -77,10 +189,21 @@ export default function WeatherDetails({
       value:
         `${current.vis_km} km`,
 
+      description:
+        getVisibilityStatus(
+          current.vis_km
+        ),
+
       icon: Eye,
 
-      color:
+      iconColor:
         "text-cyan-500 dark:text-cyan-400",
+
+      iconBackground:
+        "bg-cyan-100 dark:bg-cyan-900/30",
+
+      hoverBorder:
+        "hover:border-cyan-400 dark:hover:border-cyan-500",
     },
 
     {
@@ -89,10 +212,19 @@ export default function WeatherDetails({
       value:
         `${current.pressure_mb} hPa`,
 
+      description:
+        "Atmospheric pressure",
+
       icon: Gauge,
 
-      color:
+      iconColor:
         "text-yellow-500 dark:text-yellow-400",
+
+      iconBackground:
+        "bg-yellow-100 dark:bg-yellow-900/30",
+
+      hoverBorder:
+        "hover:border-yellow-400 dark:hover:border-yellow-500",
     },
 
     {
@@ -104,10 +236,21 @@ export default function WeatherDetails({
           windUnit
         ),
 
+      description:
+        current.wind_dir
+          ? `Direction: ${current.wind_dir}`
+          : "Current wind speed",
+
       icon: Wind,
 
-      color:
+      iconColor:
         "text-green-500 dark:text-green-400",
+
+      iconBackground:
+        "bg-green-100 dark:bg-green-900/30",
+
+      hoverBorder:
+        "hover:border-green-400 dark:hover:border-green-500",
     },
 
     {
@@ -116,10 +259,21 @@ export default function WeatherDetails({
       value:
         `${current.precip_mm} mm`,
 
+      description:
+        getRainStatus(
+          current.precip_mm
+        ),
+
       icon: CloudRain,
 
-      color:
+      iconColor:
         "text-indigo-500 dark:text-indigo-400",
+
+      iconBackground:
+        "bg-indigo-100 dark:bg-indigo-900/30",
+
+      hoverBorder:
+        "hover:border-indigo-400 dark:hover:border-indigo-500",
     },
 
     {
@@ -128,10 +282,21 @@ export default function WeatherDetails({
       value:
         `${current.uv}`,
 
+      description:
+        getUVStatus(
+          current.uv
+        ),
+
       icon: Sun,
 
-      color:
+      iconColor:
         "text-orange-500 dark:text-orange-400",
+
+      iconBackground:
+        "bg-orange-100 dark:bg-orange-900/30",
+
+      hoverBorder:
+        "hover:border-orange-400 dark:hover:border-orange-500",
     },
 
     {
@@ -140,10 +305,19 @@ export default function WeatherDetails({
       value:
         current.condition.text,
 
+      description:
+        "Current weather condition",
+
       icon: Cloud,
 
-      color:
+      iconColor:
         "text-sky-500 dark:text-sky-400",
+
+      iconBackground:
+        "bg-sky-100 dark:bg-sky-900/30",
+
+      hoverBorder:
+        "hover:border-sky-400 dark:hover:border-sky-500",
     },
   ];
 
@@ -171,14 +345,23 @@ export default function WeatherDetails({
           Weather Details
         </h2>
 
-        <p className="text-slate-500 dark:text-slate-400">
-          Live atmospheric conditions
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Live atmospheric conditions for{" "}
+          {weather.location.name}
         </p>
       </div>
 
       {/* Weather Details Grid */}
 
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        className="
+          grid
+          items-stretch
+          gap-5
+          sm:grid-cols-2
+          xl:grid-cols-4
+        "
+      >
         {details.map(
           (item) => {
             const Icon =
@@ -186,55 +369,92 @@ export default function WeatherDetails({
 
             return (
               <div
-                key={
-                  item.title
-                }
-                className="
+                key={item.title}
+                className={`
+                  group
+                  h-full
                   rounded-2xl
                   border
                   border-slate-200
-                  bg-slate-100
+                  bg-slate-50
                   p-5
                   transition-all
                   duration-300
                   hover:-translate-y-1
-                  hover:border-blue-400
                   hover:shadow-lg
                   dark:border-slate-700
                   dark:bg-slate-800
-                  dark:hover:border-blue-500
-                "
+                  ${item.hoverBorder}
+                `}
               >
                 {/* Icon + Live Badge */}
 
-                <div className="mb-4 flex items-center justify-between">
-                  <Icon
-                    size={28}
-                    className={
-                      item.color
-                    }
-                  />
+                <div className="mb-5 flex items-center justify-between">
+                  <div
+                    className={`
+                      flex
+                      h-12
+                      w-12
+                      items-center
+                      justify-center
+                      rounded-xl
+                      transition-transform
+                      duration-300
+                      group-hover:scale-110
+                      ${item.iconBackground}
+                    `}
+                  >
+                    <Icon
+                      size={25}
+                      className={
+                        item.iconColor
+                      }
+                    />
+                  </div>
 
-                  <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                  <span
+                    className="
+                      rounded-full
+                      bg-blue-100
+                      px-2.5
+                      py-1
+                      text-xs
+                      font-medium
+                      text-blue-600
+                      dark:bg-blue-900/40
+                      dark:text-blue-300
+                    "
+                  >
                     Live
                   </span>
                 </div>
 
                 {/* Title */}
 
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {
-                    item.title
-                  }
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                  {item.title}
                 </p>
 
                 {/* Value */}
 
-                <h3 className="mt-2 break-words text-2xl font-bold text-slate-900 dark:text-white">
-                  {
-                    item.value
-                  }
+                <h3
+                  className="
+                    mt-2
+                    break-words
+                    text-2xl
+                    font-bold
+                    text-slate-900
+                    dark:text-white
+                  "
+                >
+                  {item.value}
                 </h3>
+
+                {/* Description */}
+
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  {item.description}
+                </p>
               </div>
             );
           }

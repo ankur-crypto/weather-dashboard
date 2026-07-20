@@ -9,7 +9,14 @@ import {
 } from "lucide-react";
 
 import { WeatherData } from "@/types/weather";
-import { getWeatherNotifications } from "@/utils/weatherNotifications";
+
+import {
+  getWeatherNotifications,
+} from "@/utils/weatherNotifications";
+
+import {
+  useSettingsStore,
+} from "@/store/settingsStore";
 
 interface Props {
   weather: WeatherData;
@@ -18,11 +25,30 @@ interface Props {
 export default function WeatherNotifications({
   weather,
 }: Props) {
-  const notifications =
-    getWeatherNotifications(weather);
+  /*
+   * Global Settings
+   */
+  const {
+    temperatureUnit,
+    windUnit,
+  } = useSettingsStore();
 
   /*
-   * Count important notifications.
+   * Generate Weather Notifications
+   *
+   * Temperature and wind values
+   * inside notification messages
+   * now follow global settings.
+   */
+  const notifications =
+    getWeatherNotifications(
+      weather,
+      temperatureUnit,
+      windUnit
+    );
+
+  /*
+   * Count Important Notifications
    */
   const dangerCount =
     notifications.filter(
@@ -37,7 +63,7 @@ export default function WeatherNotifications({
     ).length;
 
   return (
-    <div
+    <section
       className="
         mt-8
         rounded-3xl
@@ -86,7 +112,7 @@ export default function WeatherNotifications({
 
         {/* Notification Count */}
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {dangerCount > 0 && (
             <span
               className="
@@ -101,7 +127,10 @@ export default function WeatherNotifications({
                 dark:text-red-400
               "
             >
-              {dangerCount} Critical
+              {dangerCount}{" "}
+              {dangerCount === 1
+                ? "Critical"
+                : "Critical"}
             </span>
           )}
 
@@ -119,7 +148,10 @@ export default function WeatherNotifications({
                 dark:text-yellow-400
               "
             >
-              {warningCount} Warning
+              {warningCount}{" "}
+              {warningCount === 1
+                ? "Warning"
+                : "Warnings"}
             </span>
           )}
 
@@ -135,6 +167,7 @@ export default function WeatherNotifications({
               dark:bg-blue-900/30
               dark:text-blue-400
             "
+            title="Total notifications"
           >
             {notifications.length}
           </span>
@@ -147,15 +180,12 @@ export default function WeatherNotifications({
         {notifications.map(
           (notification) => {
             /*
-             * Danger
+             * Notification Types
              */
             const isDanger =
               notification.type ===
               "danger";
 
-            /*
-             * Warning
-             */
             const isWarning =
               notification.type ===
               "warning";
@@ -163,11 +193,12 @@ export default function WeatherNotifications({
             /*
              * Dynamic Icon
              */
-            const Icon = isDanger
-              ? ShieldAlert
-              : isWarning
-                ? AlertTriangle
-                : Info;
+            const Icon =
+              isDanger
+                ? ShieldAlert
+                : isWarning
+                  ? AlertTriangle
+                  : Info;
 
             /*
              * Card Styling
@@ -226,7 +257,7 @@ export default function WeatherNotifications({
                   `;
 
             return (
-              <div
+              <article
                 key={
                   notification.id
                 }
@@ -268,6 +299,8 @@ export default function WeatherNotifications({
                         }
                       </h3>
 
+                      {/* Time */}
+
                       <div className="flex shrink-0 items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                         <Clock
                           size={14}
@@ -276,6 +309,8 @@ export default function WeatherNotifications({
                         Now
                       </div>
                     </div>
+
+                    {/* Message */}
 
                     <p className="mt-2 leading-6 text-slate-600 dark:text-slate-300">
                       {
@@ -312,11 +347,11 @@ export default function WeatherNotifications({
                     </div>
                   </div>
                 </div>
-              </div>
+              </article>
             );
           }
         )}
       </div>
-    </div>
+    </section>
   );
 }

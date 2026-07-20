@@ -1,445 +1,674 @@
 import { WeatherData } from "@/types/weather";
 
+import {
+  type TemperatureUnit,
+  type WindUnit,
+} from "@/store/settingsStore";
+
+import {
+  formatTemperature,
+  formatWindSpeed,
+} from "@/utils/weatherUnits";
+
+/*
+ * Local Weather Assistant
+ *
+ * Generates weather-based responses
+ * using live WeatherAPI data.
+ */
 export function askWeatherAssistant(
   question: string,
-  weather: WeatherData
+  weather: WeatherData,
+  temperatureUnit: TemperatureUnit,
+  windUnit: WindUnit
 ): string {
-  const q = question
-    .toLowerCase()
-    .trim();
+  /*
+   * Normalize Question
+   */
+  const q =
+    question
+      .toLowerCase()
+      .trim();
 
-  const current = weather.current;
+  /*
+   * Current Weather
+   */
+  const current =
+    weather.current;
 
+  const location =
+    weather.location;
+
+  /*
+   * Today's Forecast
+   */
   const today =
-    weather.forecast.forecastday[0];
+    weather.forecast
+      ?.forecastday?.[0];
 
-  const officialAlerts =
-    weather.alerts?.alert ?? [];
+  /*
+   * Weather Values
+   */
+  const temperature =
+    current.temp_c;
 
-  const epaIndex =
-    current.air_quality?.[
-      "us-epa-index"
-    ];
+  const feelsLike =
+    current.feelslike_c;
+
+  const humidity =
+    current.humidity;
+
+  const windSpeed =
+    current.wind_kph;
+
+  const windDirection =
+    current.wind_dir;
+
+  const precipitation =
+    current.precip_mm;
+
+  const visibility =
+    current.vis_km;
+
+  const pressure =
+    current.pressure_mb;
+
+  const uv =
+    current.uv;
+
+  const condition =
+    current.condition
+      .text;
 
   const rainChance =
     today?.day
-      ?.daily_chance_of_rain ?? 0;
+      ?.daily_chance_of_rain ??
+    0;
+
+  const sunrise =
+    today?.astro
+      ?.sunrise ??
+    "Unavailable";
+
+  const sunset =
+    today?.astro
+      ?.sunset ??
+    "Unavailable";
 
   /*
-   * Severe Weather / Alerts
+   * Formatted Values
+   *
+   * These automatically follow
+   * the user's Settings.
    */
-  if (
-    q.includes("alert") ||
-    q.includes("warning") ||
-    q.includes("danger") ||
-    q.includes("safe")
-  ) {
-    if (
-      officialAlerts.length > 0
-    ) {
-      const alert =
-        officialAlerts[0];
+  const formattedTemperature =
+    formatTemperature(
+      temperature,
+      temperatureUnit
+    );
 
-      return `⚠️ Weather Alert
+  const formattedFeelsLike =
+    formatTemperature(
+      feelsLike,
+      temperatureUnit
+    );
 
-${alert.headline || alert.event || "A weather warning is active."}
-
-${
-  alert.instruction ||
-  alert.desc ||
-  "Please monitor local weather conditions and take appropriate precautions."
-}`;
-    }
-
-    if (
-      current.wind_kph >= 50 ||
-      current.precip_mm >= 10
-    ) {
-      return `⚠️ Current weather conditions may require extra caution.
-
-💨 Wind: ${current.wind_kph} km/h
-🌧 Precipitation: ${current.precip_mm} mm
-
-Consider limiting unnecessary outdoor activities.`;
-    }
-
-    return `✅ There are no major weather warnings detected for ${weather.location.name} right now.`;
-  }
-
-  /*
-   * Umbrella / Rain
-   */
-  if (
-    q.includes("umbrella") ||
-    q.includes("rain")
-  ) {
-    if (
-      current.precip_mm > 0
-    ) {
-      return `🌧️ Yes, carry an umbrella.
-
-It is currently raining in ${weather.location.name} with ${current.precip_mm} mm of precipitation.`;
-    }
-
-    if (rainChance >= 50) {
-      return `☔ Carrying an umbrella is a good idea.
-
-Today's chance of rain is ${rainChance}%.`;
-    }
-
-    if (rainChance >= 20) {
-      return `🌦️ There is a ${rainChance}% chance of rain today. You may want to carry a small umbrella just in case.`;
-    }
-
-    return `☀️ An umbrella probably isn't necessary right now. Today's rain chance is only ${rainChance}%.`;
-  }
-
-  /*
-   * Travel / Driving
-   */
-  if (
-    q.includes("travel") ||
-    q.includes("drive") ||
-    q.includes("driving")
-  ) {
-    if (
-      officialAlerts.length > 0
-    ) {
-      return `⚠️ There is an active weather alert for ${weather.location.name}. Check the Weather Alerts section before travelling.`;
-    }
-
-    if (
-      current.vis_km <= 1
-    ) {
-      return `🚗 Travel requires extra caution.
-
-Visibility is only ${current.vis_km} km. If driving, reduce speed and maintain a safe distance.`;
-    }
-
-    if (
-      current.wind_kph >= 50
-    ) {
-      return `💨 Strong winds of ${current.wind_kph} km/h may make travel difficult. Consider delaying unnecessary travel if conditions worsen.`;
-    }
-
-    if (
-      current.precip_mm >= 5
-    ) {
-      return `🌧️ Heavy rain may affect travel conditions. Drive carefully and watch for waterlogged roads.`;
-    }
-
-    return `🚗 Current weather conditions appear generally suitable for travelling in ${weather.location.name}.
-
-Visibility: ${current.vis_km} km
-Wind: ${current.wind_kph} km/h`;
-  }
-
-  /*
-   * Jogging / Running / Exercise
-   */
-  if (
-    q.includes("jog") ||
-    q.includes("run") ||
-    q.includes("running") ||
-    q.includes("exercise") ||
-    q.includes("workout")
-  ) {
-    if (
-      officialAlerts.length > 0
-    ) {
-      return "⚠️ Outdoor exercise is not recommended while a significant weather alert is active.";
-    }
-
-    if (
-      current.temp_c >= 35
-    ) {
-      return `🌡️ It's quite hot at ${current.temp_c}°C. Consider exercising indoors or waiting for a cooler time of day.`;
-    }
-
-    if (
-      current.precip_mm > 2
-    ) {
-      return "🌧️ Outdoor exercise may be uncomfortable because of the current rain. Indoor exercise may be a better option.";
-    }
-
-    if (
-      current.wind_kph >= 40
-    ) {
-      return `💨 Wind speed is ${current.wind_kph} km/h, which may make outdoor exercise uncomfortable.`;
-    }
-
-    if (
-      current.uv >= 8
-    ) {
-      return `☀️ The UV index is ${current.uv}, which is very high. If you exercise outdoors, consider an early-morning or evening session and use sun protection.`;
-    }
-
-    if (
-      epaIndex !== undefined &&
-      epaIndex >= 4
-    ) {
-      return "😷 Air quality is currently unhealthy. Consider exercising indoors.";
-    }
-
-    return `🏃 Current conditions look reasonable for outdoor exercise.
-
-🌡️ ${current.temp_c}°C
-💨 Wind ${current.wind_kph} km/h
-☀️ UV ${current.uv}`;
-  }
-
-  /*
-   * Bike / Cycling
-   */
-  if (
-    q.includes("bike") ||
-    q.includes("ride") ||
-    q.includes("cycling") ||
-    q.includes("cycle")
-  ) {
-    if (
-      officialAlerts.length > 0
-    ) {
-      return "⚠️ There is an active weather alert. Check conditions carefully before riding.";
-    }
-
-    if (
-      current.precip_mm > 1
-    ) {
-      return "🚴🌧️ Roads may be wet because of rain. Consider postponing your ride or ride carefully.";
-    }
-
-    if (
-      current.wind_kph >= 35
-    ) {
-      return `🚴💨 Wind speed is ${current.wind_kph} km/h. Strong winds may make cycling difficult or less safe.`;
-    }
-
-    if (
-      current.vis_km <= 3
-    ) {
-      return `🚴 Visibility is only ${current.vis_km} km. Cycling may be less safe in these conditions.`;
-    }
-
-    return `🚴 Conditions look generally suitable for cycling.
-
-🌡️ Temperature: ${current.temp_c}°C
-💨 Wind: ${current.wind_kph} km/h
-👁️ Visibility: ${current.vis_km} km`;
-  }
-
-  /*
-   * Clothing
-   */
-  if (
-    q.includes("wear") ||
-    q.includes("dress") ||
-    q.includes("clothes") ||
-    q.includes("clothing") ||
-    q.includes("jacket")
-  ) {
-    if (
-      current.temp_c < 10
-    ) {
-      return `🧥 It's cold at ${current.temp_c}°C. Wear warm layered clothing and a jacket.`;
-    }
-
-    if (
-      current.temp_c < 18
-    ) {
-      return `🧥 The temperature is ${current.temp_c}°C. A light jacket or sweater should be comfortable.`;
-    }
-
-    if (
-      current.temp_c >= 32
-    ) {
-      return `👕 It's warm at ${current.temp_c}°C. Light, breathable clothing is a good choice. Stay hydrated.`;
-    }
-
-    if (
-      current.precip_mm > 0 ||
-      rainChance >= 50
-    ) {
-      return `🌧️ Comfortable casual clothing should be fine, but consider carrying rain protection. Today's rain chance is ${rainChance}%.`;
-    }
-
-    return `👕 Comfortable casual clothing should be suitable. The current temperature is ${current.temp_c}°C.`;
-  }
+  const formattedWind =
+    formatWindSpeed(
+      windSpeed,
+      windUnit
+    );
 
   /*
    * Air Quality
    */
-  if (
-    q.includes("air") ||
-    q.includes("pollution") ||
-    q.includes("aqi")
-  ) {
-    if (
-      epaIndex === undefined
-    ) {
-      return "🌿 Air-quality information is currently unavailable.";
-    }
+  const airQuality =
+    current.air_quality;
 
-    if (epaIndex >= 6) {
-      return "🚨 Air quality is hazardous. Avoid prolonged outdoor activity if possible.";
-    }
-
-    if (epaIndex === 5) {
-      return "😷 Air quality is very unhealthy. Consider limiting outdoor activity.";
-    }
-
-    if (epaIndex === 4) {
-      return "😷 Air quality is unhealthy. Sensitive individuals should take extra precautions outdoors.";
-    }
-
-    if (epaIndex === 3) {
-      return "🌫️ Air quality may be unhealthy for sensitive groups.";
-    }
-
-    if (epaIndex === 2) {
-      return "🌿 Air quality is moderate. Most people can continue normal outdoor activities.";
-    }
-
-    return "🌿 Air quality is currently good.";
-  }
+  const epaIndex =
+    airQuality?.[
+      "us-epa-index"
+    ];
 
   /*
-   * UV / Sun
+   * Get Air Quality Status
    */
-  if (
-    q.includes("uv") ||
-    q.includes("sun") ||
-    q.includes("sunscreen")
-  ) {
-    if (current.uv >= 8) {
-      return `☀️ UV index is ${current.uv}, which is very high. Consider limiting prolonged direct sun exposure and use appropriate sun protection.`;
-    }
+  const getAirQualityStatus =
+    () => {
+      switch (epaIndex) {
+        case 1:
+          return "Good";
 
-    if (current.uv >= 6) {
-      return `☀️ UV index is ${current.uv}, which is high. Sun protection is recommended for extended outdoor activity.`;
-    }
+        case 2:
+          return "Moderate";
 
-    if (current.uv >= 3) {
-      return `😎 UV index is ${current.uv}, which is moderate. Consider sun protection during longer outdoor activities.`;
-    }
+        case 3:
+          return "Unhealthy for sensitive groups";
 
-    return `🌤️ UV index is currently ${current.uv}, which is relatively low.`;
-  }
+        case 4:
+          return "Unhealthy";
+
+        case 5:
+          return "Very unhealthy";
+
+        case 6:
+          return "Hazardous";
+
+        default:
+          return "Unavailable";
+      }
+    };
+
+  const airQualityStatus =
+    getAirQualityStatus();
 
   /*
-   * Visibility
+   * Umbrella Advice
    */
   if (
-    q.includes("visibility") ||
-    q.includes("fog")
+    q.includes(
+      "umbrella"
+    ) ||
+    q.includes(
+      "rain"
+    ) ||
+    q.includes(
+      "raining"
+    )
   ) {
     if (
-      current.vis_km <= 1
+      rainChance >= 60 ||
+      precipitation > 0 ||
+      condition
+        .toLowerCase()
+        .includes("rain")
     ) {
-      return `🌫️ Visibility is very low at ${current.vis_km} km. Take extra care while travelling.`;
+      return `☔ Yes, carrying an umbrella is recommended in ${location.name}.
+
+The current weather is ${condition}, with a ${rainChance}% chance of rain today.
+
+Current precipitation is ${precipitation} mm.`;
     }
 
     if (
-      current.vis_km <= 5
+      rainChance >= 30
     ) {
-      return `🌫️ Visibility is reduced to ${current.vis_km} km. Exercise caution while driving.`;
+      return `🌦️ You may want to carry a small umbrella in ${location.name}.
+
+The chance of rain today is ${rainChance}%, so some rain is possible.
+
+Current condition: ${condition}.`;
     }
 
-    return `👁️ Current visibility is ${current.vis_km} km.`;
-  }
+    return `☀️ An umbrella probably isn't necessary right now in ${location.name}.
 
-  /*
-   * Humidity
-   */
-  if (
-    q.includes("humidity")
-  ) {
-    return `💧 Current humidity in ${weather.location.name} is ${current.humidity}%.`;
+The current condition is ${condition}, and today's chance of rain is ${rainChance}%.
+
+You can still check the forecast before going out for a long time.`;
   }
 
   /*
    * Temperature
    */
   if (
-    q.includes("temperature") ||
-    q.includes("hot") ||
-    q.includes("cold")
+    q.includes(
+      "temperature"
+    ) ||
+    q.includes(
+      "temp"
+    ) ||
+    q.includes(
+      "how hot"
+    ) ||
+    q.includes(
+      "how cold"
+    )
   ) {
-    return `🌡️ The current temperature in ${weather.location.name} is ${current.temp_c}°C.
+    return `🌡️ The current temperature in ${location.name} is ${formattedTemperature}.
 
-It feels like ${current.feelslike_c}°C.
+It feels like ${formattedFeelsLike}.
 
-Today's forecast:
-⬆️ High: ${today.day.maxtemp_c}°C
-⬇️ Low: ${today.day.mintemp_c}°C`;
+Current weather condition: ${condition}.`;
   }
 
   /*
    * Wind
    */
   if (
-    q.includes("wind")
+    q.includes(
+      "wind"
+    ) ||
+    q.includes(
+      "windy"
+    )
   ) {
-    return `💨 Current wind speed is ${current.wind_kph} km/h from ${current.wind_dir}.
+    let advice =
+      "Wind conditions are currently manageable.";
 
-Today's maximum forecast wind speed is ${today.day.maxwind_kph} km/h.`;
+    if (
+      windSpeed >= 40
+    ) {
+      advice =
+        "The wind is quite strong, so take extra care during outdoor activities.";
+    } else if (
+      windSpeed >= 25
+    ) {
+      advice =
+        "It is moderately windy outside.";
+    } else if (
+      windSpeed <= 10
+    ) {
+      advice =
+        "The wind is relatively light.";
+    }
+
+    return `💨 The current wind speed in ${location.name} is ${formattedWind}.
+
+Direction: ${windDirection}.
+
+${advice}`;
+  }
+
+  /*
+   * Humidity
+   */
+  if (
+    q.includes(
+      "humidity"
+    ) ||
+    q.includes(
+      "humid"
+    )
+  ) {
+    let humidityAdvice =
+      "The humidity level is comfortable.";
+
+    if (
+      humidity >= 80
+    ) {
+      humidityAdvice =
+        "It is quite humid, so the weather may feel warmer and more uncomfortable.";
+    } else if (
+      humidity >= 60
+    ) {
+      humidityAdvice =
+        "Humidity is moderately high.";
+    } else if (
+      humidity < 30
+    ) {
+      humidityAdvice =
+        "The air is relatively dry.";
+    }
+
+    return `💧 The current humidity in ${location.name} is ${humidity}%.
+
+${humidityAdvice}`;
+  }
+
+  /*
+   * Jogging / Running
+   */
+  if (
+    q.includes(
+      "jog"
+    ) ||
+    q.includes(
+      "jogging"
+    ) ||
+    q.includes(
+      "running"
+    ) ||
+    q.includes(
+      "run outside"
+    )
+  ) {
+    if (
+      rainChance >= 70 ||
+      precipitation > 2
+    ) {
+      return `🏃 Outdoor jogging may not be ideal right now.
+
+There is a ${rainChance}% chance of rain in ${location.name}, with current conditions of ${condition}.
+
+Consider indoor exercise or wait for the weather to improve.`;
+    }
+
+    if (
+      temperature >= 35
+    ) {
+      return `🏃 It is quite hot for outdoor jogging.
+
+The temperature is ${formattedTemperature} and feels like ${formattedFeelsLike}.
+
+If you go running, consider a cooler time of day and stay hydrated.`;
+    }
+
+    if (
+      uv >= 8
+    ) {
+      return `🏃 You can jog outside, but the UV index is high at ${uv}.
+
+The temperature is ${formattedTemperature}.
+
+Consider sun protection and avoid prolonged exposure during peak sunlight.`;
+    }
+
+    return `🏃 Conditions look reasonable for jogging in ${location.name}.
+
+Temperature: ${formattedTemperature}
+Feels like: ${formattedFeelsLike}
+Weather: ${condition}
+Wind: ${formattedWind}
+Rain chance: ${rainChance}%
+
+Check local conditions before heading out.`;
+  }
+
+  /*
+   * Cycling / Bike
+   */
+  if (
+    q.includes(
+      "bike"
+    ) ||
+    q.includes(
+      "bicycle"
+    ) ||
+    q.includes(
+      "cycling"
+    ) ||
+    q.includes(
+      "cycle"
+    )
+  ) {
+    if (
+      rainChance >= 70 ||
+      precipitation > 2
+    ) {
+      return `🚴 Cycling conditions may be poor right now.
+
+The chance of rain is ${rainChance}%, and the current condition is ${condition}.
+
+Wet roads may reduce traction and visibility.`;
+    }
+
+    if (
+      windSpeed >= 40
+    ) {
+      return `🚴 Cycling may be difficult because of strong wind.
+
+Current wind speed: ${formattedWind}
+Direction: ${windDirection}
+
+Consider waiting until wind conditions improve.`;
+    }
+
+    return `🚴 Cycling conditions currently look reasonable in ${location.name}.
+
+Temperature: ${formattedTemperature}
+Wind: ${formattedWind}
+Rain chance: ${rainChance}%
+Visibility: ${visibility} km
+
+Stay aware of changing local weather and road conditions.`;
+  }
+
+  /*
+   * Travel
+   */
+  if (
+    q.includes(
+      "travel"
+    ) ||
+    q.includes(
+      "drive"
+    ) ||
+    q.includes(
+      "driving"
+    ) ||
+    q.includes(
+      "trip"
+    )
+  ) {
+    if (
+      visibility < 2
+    ) {
+      return `🚗 Travel conditions may be difficult because visibility is only ${visibility} km.
+
+Current weather: ${condition}.
+
+If driving, use extra caution and maintain a safe distance from other vehicles.`;
+    }
+
+    if (
+      rainChance >= 70
+    ) {
+      return `🚗 Travel is possible, but rain may affect road conditions.
+
+Chance of rain: ${rainChance}%
+Visibility: ${visibility} km
+Weather: ${condition}
+
+Allow extra travel time and drive according to road conditions.`;
+    }
+
+    return `🚗 Current weather conditions look generally suitable for travel in ${location.name}.
+
+Weather: ${condition}
+Temperature: ${formattedTemperature}
+Visibility: ${visibility} km
+Wind: ${formattedWind}
+
+Continue checking weather conditions if you're planning a longer journey.`;
+  }
+
+  /*
+   * Clothing
+   */
+  if (
+    q.includes(
+      "wear"
+    ) ||
+    q.includes(
+      "clothes"
+    ) ||
+    q.includes(
+      "clothing"
+    ) ||
+    q.includes(
+      "dress"
+    )
+  ) {
+    let clothingAdvice =
+      "Comfortable everyday clothing should be suitable.";
+
+    if (
+      temperature >= 30
+    ) {
+      clothingAdvice =
+        "Lightweight, breathable clothing should be more comfortable in the warm weather.";
+    } else if (
+      temperature >= 20
+    ) {
+      clothingAdvice =
+        "Light and comfortable clothing should work well.";
+    } else if (
+      temperature >= 10
+    ) {
+      clothingAdvice =
+        "A light jacket or sweater may be useful.";
+    } else {
+      clothingAdvice =
+        "Warm clothing and an outer layer are recommended.";
+    }
+
+    const rainAdvice =
+      rainChance >= 50
+        ? " You may also want to carry an umbrella or light rain jacket."
+        : "";
+
+    return `👕 ${clothingAdvice}${rainAdvice}
+
+Current temperature: ${formattedTemperature}
+Feels like: ${formattedFeelsLike}
+Weather: ${condition}
+Rain chance: ${rainChance}%`;
+  }
+
+  /*
+   * Air Quality
+   */
+  if (
+    q.includes(
+      "air quality"
+    ) ||
+    q.includes(
+      "aqi"
+    ) ||
+    q.includes(
+      "pollution"
+    )
+  ) {
+    return `🌿 The current air quality status in ${location.name} is ${airQualityStatus}.
+
+US EPA Index: ${epaIndex ?? "Unavailable"}
+
+People who are sensitive to air pollution should consider current local air-quality guidance before prolonged outdoor activity.`;
+  }
+
+  /*
+   * UV Index
+   */
+  if (
+    q.includes(
+      "uv"
+    ) ||
+    q.includes(
+      "sun"
+    ) ||
+    q.includes(
+      "sunlight"
+    )
+  ) {
+    let uvAdvice =
+      "UV exposure is relatively low.";
+
+    if (
+      uv >= 11
+    ) {
+      uvAdvice =
+        "The UV level is extreme. Strong sun protection is important.";
+    } else if (
+      uv >= 8
+    ) {
+      uvAdvice =
+        "The UV level is very high. Consider limiting prolonged direct sun exposure.";
+    } else if (
+      uv >= 6
+    ) {
+      uvAdvice =
+        "The UV level is high. Sun protection is recommended.";
+    } else if (
+      uv >= 3
+    ) {
+      uvAdvice =
+        "The UV level is moderate.";
+    }
+
+    return `☀️ The current UV index in ${location.name} is ${uv}.
+
+${uvAdvice}`;
   }
 
   /*
    * Sunrise
    */
   if (
-    q.includes("sunrise")
+    q.includes(
+      "sunrise"
+    )
   ) {
-    return `🌅 Sunrise in ${weather.location.name} today is at ${today.astro.sunrise}.`;
+    return `🌅 Sunrise in ${location.name} is at ${sunrise}.`;
   }
 
   /*
    * Sunset
    */
   if (
-    q.includes("sunset")
+    q.includes(
+      "sunset"
+    )
   ) {
-    return `🌇 Sunset in ${weather.location.name} today is at ${today.astro.sunset}.`;
+    return `🌇 Sunset in ${location.name} is at ${sunset}.`;
   }
 
   /*
-   * General Weather
+   * Visibility
    */
   if (
-    q.includes("weather") ||
-    q.includes("today") ||
-    q.includes("condition")
+    q.includes(
+      "visibility"
+    )
   ) {
-    return `🌦️ Current weather in ${weather.location.name}:
+    return `👁️ Current visibility in ${location.name} is ${visibility} km.
 
-🌡️ Temperature: ${current.temp_c}°C
-🤗 Feels like: ${current.feelslike_c}°C
-🌤️ Condition: ${current.condition.text}
-💧 Humidity: ${current.humidity}%
-💨 Wind: ${current.wind_kph} km/h
-🌧️ Rain chance today: ${rainChance}%
-☀️ UV Index: ${current.uv}`;
+The current weather condition is ${condition}.`;
   }
 
   /*
-   * Default
+   * Pressure
    */
-  return `🤖 I can answer questions about the current weather in ${weather.location.name}.
+  if (
+    q.includes(
+      "pressure"
+    )
+  ) {
+    return `📊 The current atmospheric pressure in ${location.name} is ${pressure} hPa.`;
+  }
 
-Try asking:
+  /*
+   * Current Weather
+   */
+  if (
+    q.includes(
+      "weather"
+    ) ||
+    q.includes(
+      "condition"
+    ) ||
+    q.includes(
+      "today"
+    )
+  ) {
+    return `🌤️ Current weather in ${location.name}, ${location.country}:
 
-☔ Should I carry an umbrella?
-🏃 Can I go jogging?
-🚴 Can I ride my bike?
-🚗 Can I travel today?
-👕 What should I wear?
-🌿 Is the air quality good?
-☀️ Is the UV level high?
-🌫️ How is the visibility?
-⚠️ Are there any weather alerts?
-🌡️ What is the temperature?
-💨 How strong is the wind?
-🌅 What time is sunrise?
-🌇 What time is sunset?`;
+Weather: ${condition}
+Temperature: ${formattedTemperature}
+Feels like: ${formattedFeelsLike}
+Humidity: ${humidity}%
+Wind: ${formattedWind}
+Rain chance: ${rainChance}%
+Visibility: ${visibility} km
+UV index: ${uv}`;
+  }
+
+  /*
+   * Default Response
+   */
+  return `🤖 I can help you understand the current weather in ${location.name}.
+
+Try asking me:
+
+• What is the temperature?
+• Should I carry an umbrella?
+• What should I wear?
+• Can I go jogging?
+• Can I ride my bike?
+• Can I travel today?
+• How strong is the wind?
+• What is the humidity?
+• Is the air quality good?
+• What is the UV index?
+• When is sunrise?
+• When is sunset?`;
 }

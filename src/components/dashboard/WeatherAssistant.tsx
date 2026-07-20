@@ -15,7 +15,14 @@ import {
 } from "lucide-react";
 
 import { WeatherData } from "@/types/weather";
-import { askWeatherAssistant } from "@/utils/weatherAssistant";
+
+import {
+  useSettingsStore,
+} from "@/store/settingsStore";
+
+import {
+  askWeatherAssistant,
+} from "@/utils/weatherAssistant";
 
 interface Props {
   weather: WeatherData;
@@ -58,12 +65,29 @@ I can help with:
 export default function WeatherAssistant({
   weather,
 }: Props) {
+  /*
+   * Global Weather Settings
+   */
+  const {
+    temperatureUnit,
+    windUnit,
+  } = useSettingsStore();
+
+  /*
+   * User Input
+   */
   const [question, setQuestion] =
     useState("");
 
+  /*
+   * Assistant Typing State
+   */
   const [typing, setTyping] =
     useState(false);
 
+  /*
+   * Chat Messages
+   */
   const [messages, setMessages] =
     useState<Message[]>(() => [
       createWelcomeMessage(
@@ -72,14 +96,15 @@ export default function WeatherAssistant({
       ),
     ]);
 
+  /*
+   * Bottom Reference
+   */
   const bottomRef =
     useRef<HTMLDivElement>(null);
 
   /*
-   * Automatically scroll to latest message.
-   *
-   * We keep this useEffect because it interacts
-   * with the DOM instead of resetting React state.
+   * Automatically scroll
+   * to latest message.
    */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
@@ -88,7 +113,7 @@ export default function WeatherAssistant({
   }, [messages, typing]);
 
   /*
-   * Quick question suggestions.
+   * Quick Question Suggestions
    */
   const suggestions = [
     "Should I carry an umbrella?",
@@ -102,7 +127,8 @@ export default function WeatherAssistant({
   ];
 
   /*
-   * Send question to local weather assistant.
+   * Send question to
+   * local weather assistant.
    */
   const sendQuestion = (
     text: string
@@ -119,7 +145,7 @@ export default function WeatherAssistant({
     }
 
     /*
-     * Add user message.
+     * Add User Message
      */
     setMessages((prev) => [
       ...prev,
@@ -129,18 +155,33 @@ export default function WeatherAssistant({
       },
     ]);
 
+    /*
+     * Start Typing Indicator
+     */
     setTyping(true);
 
     /*
-     * Small delay to simulate assistant typing.
+     * Small delay to simulate
+     * assistant typing.
      */
     setTimeout(() => {
+      /*
+       * Generate Weather Response
+       *
+       * Pass global temperature
+       * and wind settings.
+       */
       const response =
         askWeatherAssistant(
           cleanText,
-          weather
+          weather,
+          temperatureUnit,
+          windUnit
         );
 
+      /*
+       * Add Assistant Message
+       */
       setMessages((prev) => [
         ...prev,
         {
@@ -149,12 +190,15 @@ export default function WeatherAssistant({
         },
       ]);
 
+      /*
+       * Stop Typing Indicator
+       */
       setTyping(false);
     }, 700);
   };
 
   /*
-   * Handle Send button.
+   * Handle Send Button
    */
   const handleAsk = () => {
     if (
@@ -175,7 +219,7 @@ export default function WeatherAssistant({
   };
 
   /*
-   * Handle quick suggestion.
+   * Handle Quick Suggestion
    */
   const handleSuggestion = (
     item: string
@@ -188,7 +232,7 @@ export default function WeatherAssistant({
   };
 
   /*
-   * Clear chat.
+   * Clear Chat
    */
   const handleClearChat = () => {
     if (typing) {

@@ -8,6 +8,7 @@ export interface AirQuality {
   co: number;
   no2: number;
   o3: number;
+  so2: number;
   pm2_5: number;
   pm10: number;
 }
@@ -19,36 +20,29 @@ export interface Current {
 
   wind_kph: number;
   wind_dir: string;
-
-  pressure_mb: number;
-
-  vis_km: number;
-
-  uv: number;
-
-  precip_mm: number;
-
-  // Add these ↓
-
+  wind_degree?: number;
   gust_kph?: number;
 
+  pressure_mb: number;
+  vis_km: number;
+  uv: number;
+  precip_mm: number;
+
   cloud?: number;
-
   is_day?: number;
-
   last_updated?: string;
 
   condition: Condition;
 
   air_quality?: AirQuality;
 }
-
 export interface Day {
   maxtemp_c: number;
   mintemp_c: number;
   avgtemp_c: number;
 
   maxwind_kph: number;
+
   avghumidity: number;
 
   daily_chance_of_rain: number;
@@ -65,8 +59,11 @@ export interface Astro {
 export interface Hour {
   time_epoch: number;
   time: string;
+
   temp_c: number;
+
   chance_of_rain: number;
+
   wind_kph: number;
 
   condition: Condition;
@@ -74,8 +71,11 @@ export interface Hour {
 
 export interface ForecastDay {
   date: string;
+
   day: Day;
+
   astro: Astro;
+
   hour: Hour[];
 }
 
@@ -87,23 +87,38 @@ export interface Location {
   name: string;
   region: string;
   country: string;
+
   lat: number;
   lon: number;
+
   localtime: string;
 }
+
 export interface WeatherAlert {
   headline: string;
+
   msgtype: string;
+
   severity: string;
+
   urgency: string;
+
   areas: string;
+
   category: string;
+
   certainty: string;
+
   event: string;
+
   note: string;
+
   effective: string;
+
   expires: string;
+
   desc: string;
+
   instruction: string;
 }
 
@@ -113,7 +128,9 @@ export interface Alerts {
 
 export interface WeatherData {
   location: Location;
+
   current: Current;
+
   forecast: Forecast;
 
   alerts?: Alerts;
